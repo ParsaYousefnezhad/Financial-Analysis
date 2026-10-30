@@ -1,0 +1,3106 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>صورت‌های مالی استاندارد چندساله و تحلیل روند (کدال) — Stock Platform</title>
+
+<!-- Bootstrap 5 RTL -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+
+<!-- Font: Unified Vazirmatn (وزیرمتن یکپارچه) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<!-- Chart.js for Interactive Financial Trends Visualization -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+<style>
+:root {
+    --tv-bg:          #ffffff;
+    --tv-bg-2:        #f8fafc;
+    --tv-bg-3:        #f1f5f9;
+    --tv-border:      #e2e8f0;
+    --tv-border-soft: #f1f5f9;
+    --tv-text:        #0f172a;
+    --tv-text-2:      #334155;
+    --tv-muted:       #64748b;
+    --tv-blue:        #2563eb;
+    --tv-blue-hover:  #1d4ed8;
+    --tv-blue-soft:   #eff6ff;
+    --tv-green:       #0d9488;
+    --tv-green-soft:  #f0fdfa;
+    --tv-red:         #dc2626;
+    --tv-red-soft:    #fef2f2;
+    --tv-amber:       #d97706;
+    --tv-purple:      #4f46e5;
+    --tv-font-ui:     'Vazirmatn', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --tv-font-num:    'Vazirmatn', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --tv-table-size:  13.5px;
+    --tv-num-size:    13.5px;
+    --tv-num-weight:  600;
+    --tv-toolbar-h:   48px;
+}
+
+* { box-sizing: border-box; }
+html, body {
+    height: 100%;
+    margin: 0;
+    background: var(--tv-bg-2);
+    font-family: var(--tv-font-ui);
+    font-size: 13px;
+    color: var(--tv-text);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Top Toolbar */
+.tv-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: var(--tv-toolbar-h);
+    padding: 6px 14px;
+    background: var(--tv-bg);
+    border-bottom: 1px solid var(--tv-border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    flex-wrap: wrap;
+}
+.tv-tool-sep { width: 1px; height: 22px; background: var(--tv-border); margin: 0 2px; flex-shrink: 0; }
+.tv-toolbar-spacer { flex: 1; }
+
+.tv-tool-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 32px;
+    padding: 0 12px;
+    background: var(--tv-bg);
+    border: 1px solid var(--tv-border);
+    border-radius: 6px;
+    color: var(--tv-text);
+    font-size: 12px;
+    font-weight: 600;
+    font-family: var(--tv-font-ui);
+    cursor: pointer;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: all .14s ease;
+}
+.tv-tool-btn:hover { background: var(--tv-bg-3); color: var(--tv-text); border-color: #cbd5e1; }
+.tv-tool-btn.primary { background: var(--tv-blue); color: #fff; border-color: var(--tv-blue); }
+.tv-tool-btn.primary:hover { background: var(--tv-blue-hover); }
+.tv-tool-btn.success { background: var(--tv-green); color: #fff; border-color: var(--tv-green); }
+.tv-tool-btn.success:hover { background: #0f766e; }
+.tv-tool-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+.tv-input {
+    height: 32px;
+    width: 210px;
+    padding: 0 10px;
+    border: 1px solid var(--tv-border);
+    border-radius: 6px;
+    outline: none;
+    font-size: 12.5px;
+    font-weight: 500;
+    background: var(--tv-bg);
+    color: var(--tv-text);
+    font-family: var(--tv-font-ui);
+}
+.tv-input:focus {
+    border-color: var(--tv-blue);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+/* Mode Segmented Switch (Standalone vs Consolidated) */
+.mode-switch {
+    display: inline-flex;
+    background: var(--tv-bg-3);
+    padding: 2px;
+    border-radius: 6px;
+    border: 1px solid var(--tv-border);
+}
+.mode-btn {
+    border: none;
+    background: transparent;
+    padding: 4px 10px;
+    font-size: 11.5px;
+    font-weight: 600;
+    font-family: var(--tv-font-ui);
+    color: var(--tv-text-2);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all .12s;
+}
+.mode-btn.active {
+    background: var(--tv-bg);
+    color: var(--tv-blue);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+}
+
+/* Quick Firm Bar */
+.firms-strip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    background: var(--tv-bg);
+    border-bottom: 1px solid var(--tv-border);
+    overflow-x: auto;
+}
+.firms-strip-label {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--tv-muted);
+    white-space: nowrap;
+    margin-inline-end: 4px;
+}
+.firm-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 5px;
+    border: 1px solid var(--tv-border);
+    background: var(--tv-bg-2);
+    color: var(--tv-text-2);
+    font-size: 12px;
+    font-weight: 600;
+    font-family: var(--tv-font-ui);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all .12s;
+}
+.firm-chip:hover {
+    border-color: var(--tv-blue);
+    color: var(--tv-blue);
+    background: var(--tv-blue-soft);
+}
+.firm-chip.active {
+    background: var(--tv-blue);
+    color: #ffffff;
+    border-color: var(--tv-blue);
+}
+.firm-chip .db-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #cbd5e1;
+}
+.firm-chip .db-dot.ready { background: var(--tv-green); }
+.firm-chip.active .db-dot { background: #ffffff; }
+
+/* Statement Tabs + Filter Bar */
+.tabs-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 14px;
+    background: var(--tv-bg-2);
+    border-bottom: 1px solid var(--tv-border);
+    flex-wrap: wrap;
+}
+.tabs-group {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+}
+.tab-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    background: var(--tv-bg);
+    border: 1px solid var(--tv-border);
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 12.5px;
+    font-family: var(--tv-font-ui);
+    cursor: pointer;
+    color: var(--tv-text-2);
+    white-space: nowrap;
+    transition: all .14s;
+}
+.tab-item:hover { background: var(--tv-bg-3); color: var(--tv-text); }
+.tab-item.active {
+    background: var(--tv-blue);
+    border-color: var(--tv-blue);
+    color: #ffffff;
+    box-shadow: 0 1px 3px rgba(37, 99, 235, 0.25);
+}
+.tab-item.trends-tab {
+    border-color: #bfdbfe;
+    background: #eff6ff;
+    color: #1d4ed8;
+}
+.tab-item.trends-tab.active {
+    background: linear-gradient(135deg, #2563eb 0%, #0d9488 100%);
+    border-color: transparent;
+    color: #ffffff;
+}
+
+.meta-badges {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    font-size: 12px;
+    color: var(--tv-muted);
+}
+.meta-inline-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--tv-text-2);
+    font-weight: 500;
+}
+.meta-inline-item .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--tv-blue); }
+.meta-sep { color: #cbd5e1; }
+
+/* Main Content Area */
+.fund-main { padding: 12px 14px; max-width: 100%; margin: 0 auto; }
+
+/* ============================================================================
+   Summary Ratio Cards Row (Before fin-table: Current Ratio, ROE, Debt-to-Equity, ROA)
+   ============================================================================ */
+.ratios-summary-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 12px;
+}
+@media (max-width: 1100px) {
+    .ratios-summary-row { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 640px) {
+    .ratios-summary-row { grid-template-columns: 1fr; }
+}
+.ratio-card {
+    background: var(--tv-bg);
+    border: 1px solid var(--tv-border);
+    border-radius: 8px;
+    padding: 12px 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
+    transition: border-color .14s ease, box-shadow .14s ease;
+}
+.ratio-card:hover {
+    border-color: #cbd5e1;
+    box-shadow: 0 3px 8px rgba(15, 23, 42, 0.05);
+}
+.ratio-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+.ratio-card-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--tv-text-2);
+}
+.ratio-card-tag {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--tv-blue);
+    background: var(--tv-blue-soft);
+    padding: 1px 7px;
+    border-radius: 4px;
+}
+.ratio-card-main {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    margin: 2px 0;
+}
+.ratio-card-val {
+    font-family: var(--tv-font-num);
+    font-size: 21px;
+    font-weight: 800;
+    color: var(--tv-text);
+    direction: ltr;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+}
+.ratio-card-delta {
+    font-size: 11.5px;
+    font-weight: 700;
+    direction: ltr;
+}
+.ratio-card-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--tv-muted);
+    padding-top: 5px;
+    border-top: 1px dashed var(--tv-border-soft);
+}
+
+/* ============================================================================
+   Financial Statement Table — Unified Vazirmatn Typography & Layout
+   ============================================================================ */
+.table-card {
+    background: var(--tv-bg);
+    border: 1px solid var(--tv-border);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+}
+.table-scroll {
+    overflow: auto;
+    max-height: calc(100vh - 285px);
+}
+.table-scroll::-webkit-scrollbar { width: 8px; height: 8px; }
+.table-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+.table-scroll::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+table.fin-table {
+    width: 100%;
+    margin: 0;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-family: var(--tv-font-ui);
+    font-size: var(--tv-table-size);
+}
+table.fin-table th,
+table.fin-table td {
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--tv-border-soft);
+    vertical-align: middle;
+}
+table.fin-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: #f1f5f9;
+    font-weight: 700;
+    font-size: 13px;
+    text-align: center;
+    border-bottom: 2px solid var(--tv-border);
+    color: var(--tv-text);
+    white-space: nowrap;
+}
+
+/* Sticky First Column (شرح / Standard Line Item) — RTL & LTR adaptive */
+table.fin-table th:first-child,
+table.fin-table td:first-child {
+    position: sticky;
+    right: 0;
+    background: var(--tv-bg);
+    z-index: 6;
+    text-align: right;
+    font-family: var(--tv-font-ui);
+    font-weight: 600;
+    color: var(--tv-text);
+    width: 340px;
+    min-width: 300px;
+    max-width: 380px;
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    line-height: 1.5;
+    border-left: 2px solid var(--tv-border);
+    box-shadow: -4px 0 10px rgba(15, 23, 42, 0.03);
+}
+html[dir="ltr"] table.fin-table th:first-child,
+html[dir="ltr"] table.fin-table td:first-child {
+    right: auto;
+    left: 0;
+    text-align: left;
+    border-left: none;
+    border-right: 2px solid var(--tv-border);
+    box-shadow: 4px 0 10px rgba(15, 23, 42, 0.03);
+}
+table.fin-table thead th:first-child {
+    background: #f1f5f9;
+    z-index: 7;
+    font-weight: 700;
+}
+
+/* Section header rows */
+table.fin-table tr.row-section td {
+    background: #eff6ff !important;
+    color: var(--tv-blue);
+    font-weight: 700;
+    font-size: var(--tv-table-size);
+    border-top: 1px solid #dbeafe;
+    border-bottom: 1px solid #dbeafe;
+    padding-top: 9px;
+    padding-bottom: 9px;
+}
+
+/* Subtotal / Total rows */
+table.fin-table tr.row-total td {
+    background: #f8fafc;
+    font-weight: 700 !important;
+    color: var(--tv-text);
+    border-top: 1px solid #cbd5e1;
+    border-bottom: 2px solid #cbd5e1;
+}
+table.fin-table tr.row-total td:first-child {
+    background: #f8fafc;
+    color: #0f172a;
+}
+
+/* Numeric Data Cells — Unified Vazirmatn Tabular Numerals */
+table.fin-table td.num {
+    text-align: center;
+    direction: ltr;
+    white-space: nowrap;
+    font-family: var(--tv-font-num);
+    font-size: var(--tv-num-size);
+    font-weight: var(--tv-num-weight);
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
+    color: #1e293b;
+    min-width: 135px;
+}
+table.fin-table tr.row-total td.num {
+    font-weight: 700;
+    color: #0f172a;
+}
+table.fin-table td.num.negative {
+    color: var(--tv-red);
+}
+table.fin-table td.num.empty {
+    color: #cbd5e1;
+    text-align: center;
+    font-weight: 400;
+}
+table.fin-table tbody tr:not(.row-section):hover td {
+    background: #f1f5f9;
+}
+table.fin-table tbody tr:not(.row-section):hover td:first-child {
+    background: #f1f5f9;
+}
+
+/* ============================================================================
+   Trends View (تحلیل روند ۵ ساله درآمد، سود خالص و حاشیه سود)
+   ============================================================================ */
+.trends-container {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+.trends-header-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 16px;
+    background: var(--tv-bg);
+    border: 1px solid var(--tv-border);
+    border-radius: 8px;
+    flex-wrap: wrap;
+}
+.trends-title-group h4 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--tv-text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.trends-title-group p {
+    margin: 3px 0 0 0;
+    font-size: 12px;
+    color: var(--tv-muted);
+}
+.trends-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+.metric-toggle-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 11px;
+    border-radius: 6px;
+    border: 1px solid var(--tv-border);
+    background: var(--tv-bg);
+    font-size: 12px;
+    font-weight: 600;
+    font-family: var(--tv-font-ui);
+    color: var(--tv-text-2);
+    cursor: pointer;
+    transition: all .12s;
+}
+.metric-toggle-btn .swatch {
+    width: 9px;
+    height: 9px;
+    border-radius: 2px;
+}
+.metric-toggle-btn.active {
+    background: var(--tv-bg-2);
+    border-color: #94a3b8;
+    color: var(--tv-text);
+}
+.metric-toggle-btn:not(.active) {
+    opacity: 0.45;
+}
+
+/* KPI Summary Strip */
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+}
+@media (max-width: 1100px) {
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 640px) {
+    .kpi-grid { grid-template-columns: 1fr; }
+}
+.kpi-card {
+    background: var(--tv-bg);
+    border: 1px solid var(--tv-border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.kpi-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--tv-muted);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.kpi-value {
+    font-family: var(--tv-font-num);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--tv-text);
+    direction: ltr;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+html[dir="ltr"] .kpi-value {
+    text-align: left;
+}
+.kpi-sub {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 11.5px;
+    color: var(--tv-muted);
+    padding-top: 4px;
+    border-top: 1px dashed var(--tv-border-soft);
+}
+.growth-pos { color: var(--tv-green); font-weight: 700; direction: ltr; }
+.growth-neg { color: var(--tv-red); font-weight: 700; direction: ltr; }
+
+/* Charts Grid */
+.charts-grid {
+    display: grid;
+    grid-template-columns: 1.35fr 1fr;
+    gap: 14px;
+}
+@media (max-width: 1150px) {
+    .charts-grid { grid-template-columns: 1fr; }
+}
+.chart-card {
+    background: var(--tv-bg);
+    border: 1px solid var(--tv-border);
+    border-radius: 8px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.chart-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+.chart-card-title {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--tv-text);
+}
+.chart-card-subtitle {
+    font-size: 11.5px;
+    color: var(--tv-muted);
+}
+.chart-canvas-wrap {
+    position: relative;
+    height: 320px;
+    width: 100%;
+}
+
+/* ============================================================================
+   Side-by-Side Comparison View (Merged Table & Split-Screen Modes)
+   ============================================================================ */
+.tab-item.compare-tab {
+    border-color: #c7d2fe;
+    background: #eef2ff;
+    color: #4338ca;
+}
+.tab-item.compare-tab.active {
+    background: linear-gradient(135deg, #4f46e5 0%, #2563eb 100%);
+    border-color: transparent;
+    color: #ffffff;
+}
+
+.compare-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.compare-header-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 16px;
+    background: var(--tv-bg);
+    border: 1px solid var(--tv-border);
+    border-radius: 8px;
+    flex-wrap: wrap;
+}
+.compare-selectors-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+.compare-sym-box {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    border: 1px solid var(--tv-border);
+    background: var(--tv-bg-2);
+}
+.compare-sym-box.active-target {
+    border-color: var(--tv-blue);
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12);
+}
+.sym-badge-a, .sym-badge-b {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 800;
+    color: #ffffff;
+    white-space: nowrap;
+}
+.sym-badge-a { background: #2563eb; }
+.sym-badge-b { background: #0d9488; }
+
+.compare-sym-input {
+    width: 125px;
+    height: 28px;
+    border: 1px solid var(--tv-border);
+    border-radius: 4px;
+    padding: 0 8px;
+    font-size: 12.5px;
+    font-weight: 600;
+    font-family: var(--tv-font-ui);
+    background: var(--tv-bg);
+    color: var(--tv-text);
+    outline: none;
+}
+.compare-sym-input:focus {
+    border-color: var(--tv-blue);
+}
+.compare-swap-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    border: 1px solid var(--tv-border);
+    background: var(--tv-bg);
+    color: var(--tv-text-2);
+    cursor: pointer;
+    transition: all .14s;
+}
+.compare-swap-btn:hover {
+    background: var(--tv-blue-soft);
+    color: var(--tv-blue);
+    border-color: var(--tv-blue);
+}
+
+/* Head-to-Head Ratio Comparison Cards */
+.compare-ratio-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin: 4px 0;
+}
+.compare-ratio-side {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.compare-ratio-side .sym-lbl {
+    font-size: 11px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+.compare-ratio-side .sym-val {
+    font-size: 18px;
+    font-weight: 800;
+    direction: ltr;
+    font-variant-numeric: tabular-nums;
+}
+.compare-bar-track {
+    width: 100%;
+    height: 6px;
+    background: var(--tv-bg-3);
+    border-radius: 3px;
+    overflow: hidden;
+    display: flex;
+    gap: 2px;
+}
+.compare-bar-fill-a { background: #2563eb; height: 100%; transition: width .25s ease; }
+.compare-bar-fill-b { background: #0d9488; height: 100%; transition: width .25s ease; }
+
+/* Merged Comparison Table Subheaders */
+table.fin-table.merged-compare-table thead tr:first-child th {
+    border-bottom: 1px solid var(--tv-border);
+}
+table.fin-table.merged-compare-table thead tr:nth-child(2) th {
+    top: 38px;
+    z-index: 5;
+    font-size: 12px;
+    padding: 7px 12px;
+    background: #f8fafc;
+    border-bottom: 2px solid var(--tv-border);
+}
+th.col-sym-a { color: #1d4ed8 !important; background: #eff6ff !important; }
+th.col-sym-b { color: #0f766e !important; background: #f0fdfa !important; }
+th.col-sym-diff { color: #475569 !important; background: #f1f5f9 !important; }
+td.cell-sym-a { background: rgba(239, 246, 255, 0.28); }
+td.cell-sym-b { background: rgba(240, 253, 250, 0.28); }
+td.cell-sym-diff { font-size: 12px !important; background: rgba(248, 250, 252, 0.6); border-inline-end: 2px solid var(--tv-border); }
+
+/* Split-Screen Two-Column Layout */
+.compare-split-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    align-items: start;
+}
+@media (max-width: 1150px) {
+    .compare-split-grid { grid-template-columns: 1fr; }
+}
+.compare-split-pane {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+}
+.compare-pane-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 9px 14px;
+    background: var(--tv-bg);
+    border: 1px solid var(--tv-border);
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 13px;
+}
+.compare-pane-banner.pane-a { border-top: 3px solid #2563eb; }
+.compare-pane-banner.pane-b { border-top: 3px solid #0d9488; }
+.compare-split-pane table.fin-table th:first-child,
+.compare-split-pane table.fin-table td:first-child {
+    width: 240px;
+    min-width: 210px;
+    max-width: 270px;
+}
+tr.sync-hover-row td {
+    background: #e0f2fe !important;
+}
+
+/* Empty / Loading States */
+.empty-state { padding: 70px 20px; text-align: center; color: var(--tv-muted); background: var(--tv-bg); border: 1px solid var(--tv-border); border-radius: 8px; }
+.empty-state h5 { font-size: 14px; font-weight: 700; color: var(--tv-text); margin-top: 10px; }
+.spinner-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 75px 20px; gap: 12px; color: var(--tv-muted); background: var(--tv-bg); border: 1px solid var(--tv-border); border-radius: 8px; }
+</style>
+</head>
+<body>
+
+<div id="app">
+    <!-- Top Toolbar -->
+    <div class="tv-toolbar">
+        <a href="/" class="tv-tool-btn" id="techPageBtn" title="بازگشت به نمودار تکنیکال">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 15l3-4 3 3 4-7"/></svg>
+            <span id="techPageBtnText">صفحه تکنیکال</span>
+        </a>
+        <span class="tv-tool-sep"></span>
+
+        <input type="text" class="tv-input" id="symbolInput" list="symbolDatalist" placeholder="جستجوی نماد (مثلاً فملی، شپنا، شبندر)…">
+        <datalist id="symbolDatalist"></datalist>
+
+        <div class="mode-switch" id="modeSwitch" title="انتخاب صورت مالی شرکت اصلی یا تلفیقی">
+            <button type="button" class="mode-btn active" data-cons="0" id="modeStandaloneBtn">شرکت اصلی</button>
+            <button type="button" class="mode-btn" data-cons="1" id="modeConsBtn">تلفیقی</button>
+        </div>
+
+        <button type="button" class="tv-tool-btn primary" id="loadBtn">نمایش صورت مالی</button>
+        <button type="button" class="tv-tool-btn" id="syncBtn" title="استخراج مستقیم ۱۰ سال صورت‌های مالی از کدال و ذخیره در دیتابیس استاندارد">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+            <span id="syncBtnText">استخراج مجدد از کدال</span>
+        </button>
+
+        <span class="tv-tool-sep"></span>
+
+        <button type="button" class="tv-tool-btn" id="digitLangBtn" title="تغییر زبان کل صفحه بین فارسی و انگلیسی (Change Page Language)">
+            <span id="langPrefixLabel">زبان: </span><strong id="digitLangLabel">فارسی</strong>
+        </button>
+
+        <button type="button" class="tv-tool-btn success" id="exportExcelBtn" title="دانلود فایل اکسل استاندارد چندساله (.xlsx)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            <span id="exportExcelBtnText">خروجی اکسل استاندارد</span>
+        </button>
+
+        <span class="tv-toolbar-spacer"></span>
+        <span class="meta-inline-item"><span class="dot"></span><span id="firmsCount">— شرکت در دیتابیس</span></span>
+    </div>
+
+    <!-- Quick Firm Strip -->
+    <div class="firms-strip" id="firmsStrip">
+        <span class="firms-strip-label" id="firmsStripLabel">نمادهای آماده و پیشنهادی:</span>
+    </div>
+
+    <!-- Statement Tabs & Item Filter -->
+    <div class="tabs-bar">
+        <div class="tabs-group" id="tabsBar">
+            <button class="tab-item active" data-stmt="Balance Sheet" id="tabBS">صورت وضعیت مالی (ترازنامه استاندارد)</button>
+            <button class="tab-item" data-stmt="Income Statement" id="tabIS">صورت سود و زیان استاندارد</button>
+            <button class="tab-item" data-stmt="Cash Flow" id="tabCF">صورت جریان وجوه نقد استاندارد</button>
+            <button class="tab-item" data-stmt="Comprehensive Income" id="tabCI">صورت سود و زیان جامع</button>
+            <button class="tab-item trends-tab" data-stmt="Trends" id="tabTrends">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 3v18h18"/><path d="M18 9l-5 5-3-3-4 4"/></svg>
+                <span id="tabTrendsText">روند سودآوری (Trends)</span>
+            </button>
+            <button class="tab-item compare-tab" data-stmt="Compare" id="tabCompare">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="7" height="18" rx="1"/><rect x="14" y="3" width="7" height="18" rx="1"/></svg>
+                <span id="tabCompareText">مقایسه دو شرکت (Compare)</span>
+            </button>
+        </div>
+
+        <div class="d-flex align-items-center gap-3">
+            <input type="text" class="tv-input" id="rowFilterInput" style="width: 195px;" placeholder="فیلتر اقلام (مثلاً سود خالص)…">
+            <div id="statsRow" class="meta-badges"></div>
+        </div>
+    </div>
+
+    <!-- Main Content Area (Summary Ratio Cards + Table or Trends View) -->
+    <main class="fund-main">
+        <div id="contentArea">
+            <div class="empty-state">
+                <h5 id="initEmptyTitle">در حال آماده‌سازی اطلاعات مالی…</h5>
+                <p id="initEmptyDesc">یک نماد را از نوار بالا انتخاب کنید تا صورت‌های مالی استاندارد و نمودار روند ۵ ساله نمایش داده شود.</p>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+const state = {
+    companies: [],
+    currentSymbol: 'شپنا',
+    currentStatement: 'Balance Sheet',
+    consolidated: 0,
+    lastData: null,
+    statementCache: {}, // key: `${symbol}_${consolidated}_${statement}`
+    rowFilter: '',
+    busy: false,
+    lang: localStorage.getItem('fund_page_lang') || 'fa', // 'fa' or 'en'
+    trendsYearsCount: 5,
+    trendsSeries: {
+        revenue: true,
+        grossProfit: false,
+        operatingProfit: true,
+        netIncome: true,
+        netMargin: true
+    },
+    // Side-by-Side Comparison View State
+    compareSymbolA: 'شپنا',
+    compareSymbolB: 'فملی',
+    compareBaseStatement: 'Balance Sheet',
+    compareLayout: 'merged', // 'merged' | 'split'
+    compareYearsCount: 3, // 3 | 5 | 0 (All)
+    compareSyncScroll: true,
+    compareActiveTarget: 'B', // clicking a firm chip in Compare mode updates target A or B
+    lastCompareData: null
+};
+
+let mainTrendChartInstance = null;
+let marginTrendChartInstance = null;
+
+const $ = (s) => document.querySelector(s);
+
+const EN_TO_FA_DIGITS = {
+    '0': '۰', '1': '۱', '2': '۲', '3': '۳', '4': '۴',
+    '5': '۵', '6': '۶', '7': '۷', '8': '۸', '9': '۹'
+};
+
+/* ============================================================================
+   Full Bilingual Dictionary (FA <-> EN) for UI, Symbols & Financial Line Items
+   ============================================================================ */
+const UI_I18N = {
+    fa: {
+        pageTitle: 'صورت‌های مالی استاندارد چندساله و تحلیل روند (کدال) — Stock Platform',
+        techPageBtn: 'صفحه تکنیکال',
+        symbolPlaceholder: 'جستجوی نماد (مثلاً فملی، شپنا، شبندر)…',
+        standalone: 'شرکت اصلی',
+        consolidated: 'تلفیقی',
+        loadBtn: 'نمایش صورت مالی',
+        syncBtn: 'استخراج مجدد از کدال',
+        langPrefix: 'زبان: ',
+        langName: 'فارسی',
+        exportExcel: 'خروجی اکسل استاندارد',
+        firmsInDb: (n) => `${n} شرکت در دیتابیس`,
+        firmsStripLabel: 'نمادهای آماده و پیشنهادی:',
+        yearsSuffix: (n) => ` (${n} سال)`,
+        tabBS: 'صورت وضعیت مالی (ترازنامه استاندارد)',
+        tabIS: 'صورت سود و زیان استاندارد',
+        tabCF: 'صورت جریان وجوه نقد استاندارد',
+        tabCI: 'صورت سود و زیان جامع',
+        tabTrends: 'روند سودآوری (Trends)',
+        filterPlaceholder: 'فیلتر اقلام (مثلاً سود خالص)…',
+        colLineItem: 'شرح (اقلام استاندارد)',
+        colFiscalYear: (y) => `سال مالی ${y}`,
+        fiscalYearsSpan: (cnt, fromY, toY) => `${cnt} سال مالی (${fromY} تا ${toY})`,
+        emptyTitle: (sym) => `اطلاعاتی برای «${sym}» یافت نشد`,
+        emptyDesc: 'روی دکمه «استخراج مجدد از کدال» کلیک کنید تا گزارش‌های ۱۰ سال اخیر از کدال دریافت و استانداردسازی شود.',
+        loadingStmt: (sym, mode) => `در حال بارگذاری «${sym}» (${mode})…`,
+        loadingTrends: (sym) => `در حال ترسیم روند ۵ ساله درآمد، سود خالص و حاشیه سود «${sym}»…`,
+        loadingSync: (sym) => `در حال استخراج صورت‌های مالی ۱۰ سال اخیر «${sym}» از سامانه کدال…`,
+        loadingSub: 'خواندن اطلاعات استاندارد از fundamental.db',
+        // Summary Ratio Cards (Before fin-table)
+        cardCurrentRatio: 'نسبت جاری (نقدینگی)',
+        cardCurrentRatioSub: 'دارایی جاری ÷ بدهی جاری',
+        cardROE: 'بازده حقوق صاحبان سهام (ROE)',
+        cardROESub: 'سود خالص ÷ حقوق مالکانه',
+        cardDE: 'نسبت بدهی به حقوق مالکانه (D/E)',
+        cardDESub: 'جمع بدهی‌ها ÷ حقوق مالکانه',
+        cardROA: 'بازده دارایی‌ها (ROA) و حاشیه سود',
+        cardROASub: 'سود خالص ÷ جمع دارایی‌ها',
+        prevYearLabel: 'سال قبل:',
+        netMarginShort: 'حاشیه سود خالص:',
+        debtAssetShort: 'بدهی به دارایی:',
+        fiscalYearTag: (y) => `سال ${y}`,
+        // Trends View
+        trendsHeaderTitle: (name, sym) => `تحلیل روند تاریخی درآمد، سود خالص و حاشیه سود — ${name} (${sym})`,
+        trendsHeaderSub: (yStart, yEnd, mode) => `بررسی عملکرد مالی از سال ${yStart} تا ${yEnd} (${mode} · ارقام به میلیون ریال)`,
+        last5Years: '۵ سال اخیر',
+        allYears: (n) => `همه سال‌ها (${n} سال)`,
+        seriesRev: 'درآمد عملیاتی',
+        seriesGross: 'سود ناخالص',
+        seriesOp: 'سود عملیاتی',
+        seriesNet: 'سود خالص',
+        seriesNetMargin: 'حاشیه سود خالص (%)',
+        kpiRevTitle: (y) => `درآمد عملیاتی (سال ${y})`,
+        kpiNetTitle: (y) => `سود خالص (سال ${y})`,
+        kpiNetMarginTitle: (y) => `حاشیه سود خالص (سال ${y})`,
+        kpiOpGrossTitle: (y) => `حاشیه سود ناخالص و عملیاتی (${y})`,
+        yoyGrowth: 'رشد سالانه:',
+        periodCagr: 'نرخ رشد مرکب (CAGR):',
+        periodAvg: 'میانگین دوره:',
+        netToSales: 'نسبت سود خالص به فروش',
+        grossMarginLabel: 'حاشیه سود ناخالص:',
+        yearsWindow: (n) => `بازه ${n} ساله`,
+        operatingWord: 'عملیاتی',
+        chart1Title: 'روند درآمد عملیاتی، سود خالص و حاشیه سود خالص',
+        chart1Sub: 'ستون‌ها: مبالغ (میلیون ریال - محور راست) · خط: حاشیه سود خالص (% - محور چپ)',
+        chart2Title: 'مقایسه روند حاشیه سودها (ناخالص، عملیاتی و خالص %)',
+        chart2Sub: (n) => `بررسی تغییرات بازدهی فروش در ${n} سال اخیر (بر حسب درصد %)`,
+        summaryColMetric: 'شاخص مالی / سال مالی',
+        summaryRowRev: 'درآمدهای عملیاتی (میلیون ریال)',
+        summaryRowGross: 'سود(زیان) ناخالص (میلیون ریال)',
+        summaryRowOp: 'سود(زیان) عملیاتی (میلیون ریال)',
+        summaryRowNet: 'سود(زیان) خالص (میلیون ریال)',
+        summarySectionRatios: 'نسبت‌های سودآوری و نرخ رشد سالانه (%)',
+        summaryRowGrossMargin: 'حاشیه سود ناخالص (Gross Margin %)',
+        summaryRowOpMargin: 'حاشیه سود عملیاتی (Operating Margin %)',
+        summaryRowNetMargin: 'حاشیه سود خالص (Net Profit Margin %)',
+        summaryRowRevYoY: 'رشد سالانه درآمد عملیاتی (YoY Revenue Growth %)',
+        summaryRowNetYoY: 'رشد سالانه سود خالص (YoY Net Income Growth %)',
+        unitMillionRial: 'میلیون ریال',
+        yearPrefix: (y) => `سال ${y}`,
+        // Side-by-Side Comparison View
+        tabCompare: 'مقایسه دو شرکت (Compare)',
+        loadingCompare: (a, b) => `در حال بارگذاری و تطبیق صورت‌های مالی «${a}» و «${b}»…`,
+        compareSymbolALabel: 'شرکت اول (A):',
+        compareSymbolBLabel: 'شرکت دوم (B):',
+        compareSwapTitle: 'جابجایی نماد اول و دوم',
+        compareRunBtn: 'اجرای مقایسه',
+        compareStmtBS: 'ترازنامه',
+        compareStmtIS: 'سود و زیان',
+        compareStmtCF: 'جریان نقد',
+        compareStmtCI: 'سود جامع',
+        compareModeMerged: 'جدول ادغام‌شده (Merged)',
+        compareModeSplit: 'دوپنجره‌ای مجزا (Split-Screen)',
+        compareYears3: '۳ سال اخیر',
+        compareYears5: '۵ سال اخیر',
+        compareYearsAll: 'همه سال‌ها',
+        compareSyncScrollLabel: 'اسکرول همزمان',
+        compareDiffHeader: 'اختلاف % (A به B)',
+        compareChipHint: (target) => `کلیک روی نمادهای بالا = انتخاب شرکت ${target}`,
+        comparePaneTitleA: (name, sym) => `شرکت اول (A): ${name} (${sym})`,
+        comparePaneTitleB: (name, sym) => `شرکت دوم (B): ${name} (${sym})`
+    },
+    en: {
+        pageTitle: 'Multi-Year Standardized Financial Statements & Trends (Codal) — Stock Platform',
+        techPageBtn: 'Technical Chart',
+        symbolPlaceholder: 'Search symbol (e.g. فملی, شپنا, شبندر)…',
+        standalone: 'Standalone',
+        consolidated: 'Consolidated',
+        loadBtn: 'Load Statement',
+        syncBtn: 'Re-Sync from Codal',
+        langPrefix: 'Language: ',
+        langName: 'English',
+        exportExcel: 'Export Standard Excel',
+        firmsInDb: (n) => `${n} Firms in DB`,
+        firmsStripLabel: 'Ready & Suggested Symbols:',
+        yearsSuffix: (n) => ` (${n}Y)`,
+        tabBS: 'Balance Sheet (Standard)',
+        tabIS: 'Income Statement (Standard)',
+        tabCF: 'Cash Flow Statement (Standard)',
+        tabCI: 'Comprehensive Income',
+        tabTrends: 'Profitability Trends (5Y)',
+        filterPlaceholder: 'Filter line items (e.g. Net Income)…',
+        colLineItem: 'Line Item (Standard Taxonomy)',
+        colFiscalYear: (y) => `FY ${y}`,
+        fiscalYearsSpan: (cnt, fromY, toY) => `${cnt} Fiscal Years (${fromY} – ${toY})`,
+        emptyTitle: (sym) => `No financial data found for "${sym}"`,
+        emptyDesc: 'Click "Re-Sync from Codal" to fetch and standardize the last 10 years of financial reports.',
+        loadingStmt: (sym, mode) => `Loading "${sym}" (${mode})…`,
+        loadingTrends: (sym) => `Plotting 5-year Revenue, Net Income & Profit Margin trends for "${sym}"…`,
+        loadingSync: (sym) => `Extracting 10-year financial statements for "${sym}" from Codal…`,
+        loadingSub: 'Reading standardized records from fundamental.db',
+        // Summary Ratio Cards (Before fin-table)
+        cardCurrentRatio: 'Current Ratio (Liquidity)',
+        cardCurrentRatioSub: 'Current Assets ÷ Current Liabilities',
+        cardROE: 'Return on Equity (ROE)',
+        cardROESub: 'Net Income ÷ Total Equity',
+        cardDE: 'Debt-to-Equity (D/E Ratio)',
+        cardDESub: 'Total Liabilities ÷ Total Equity',
+        cardROA: 'Return on Assets (ROA)',
+        cardROASub: 'Net Income ÷ Total Assets',
+        prevYearLabel: 'Prior Year:',
+        netMarginShort: 'Net Margin:',
+        debtAssetShort: 'Debt / Assets:',
+        fiscalYearTag: (y) => `FY ${y}`,
+        // Trends View
+        trendsHeaderTitle: (name, sym) => `Historical Revenue, Net Income & Profit Margins — ${name} (${sym})`,
+        trendsHeaderSub: (yStart, yEnd, mode) => `Financial performance from FY ${yStart} to FY ${yEnd} (${mode} · Values in Million IRR)`,
+        last5Years: 'Last 5 Years',
+        allYears: (n) => `All Years (${n}Y)`,
+        seriesRev: 'Operating Revenue',
+        seriesGross: 'Gross Profit',
+        seriesOp: 'Operating Income',
+        seriesNet: 'Net Income',
+        seriesNetMargin: 'Net Profit Margin (%)',
+        kpiRevTitle: (y) => `Operating Revenue (FY ${y})`,
+        kpiNetTitle: (y) => `Net Income (FY ${y})`,
+        kpiNetMarginTitle: (y) => `Net Profit Margin (FY ${y})`,
+        kpiOpGrossTitle: (y) => `Operating & Gross Margin (FY ${y})`,
+        yoyGrowth: 'YoY Growth:',
+        periodCagr: 'Period CAGR:',
+        periodAvg: 'Period Avg:',
+        netToSales: 'Net Income to Revenue',
+        grossMarginLabel: 'Gross Margin:',
+        yearsWindow: (n) => `${n}-Year Window`,
+        operatingWord: 'Operating',
+        chart1Title: 'Revenue, Net Income & Net Profit Margin Trend',
+        chart1Sub: 'Bars: Million IRR (Right Axis) · Line: Net Profit Margin % (Left Axis)',
+        chart2Title: 'Profit Margins Trajectory (Gross, Operating & Net Margin %)',
+        chart2Sub: (n) => `Sales profitability evolution over the last ${n} fiscal years (%)`,
+        summaryColMetric: 'Financial Metric / Fiscal Year',
+        summaryRowRev: 'Operating Revenue (Million IRR)',
+        summaryRowGross: 'Gross Profit (Million IRR)',
+        summaryRowOp: 'Operating Income (Million IRR)',
+        summaryRowNet: 'Net Income (Million IRR)',
+        summarySectionRatios: 'Profitability Margins & Annual Growth Rates (%)',
+        summaryRowGrossMargin: 'Gross Profit Margin (%)',
+        summaryRowOpMargin: 'Operating Profit Margin (%)',
+        summaryRowNetMargin: 'Net Profit Margin (%)',
+        summaryRowRevYoY: 'YoY Revenue Growth (%)',
+        summaryRowNetYoY: 'YoY Net Income Growth (%)',
+        unitMillionRial: 'M IRR',
+        yearPrefix: (y) => `FY ${y}`,
+        // Side-by-Side Comparison View
+        tabCompare: 'Side-by-Side Compare',
+        loadingCompare: (a, b) => `Loading & aligning financial statements for "${a}" vs "${b}"…`,
+        compareSymbolALabel: 'Company A:',
+        compareSymbolBLabel: 'Company B:',
+        compareSwapTitle: 'Swap Company A and Company B',
+        compareRunBtn: 'Compare',
+        compareStmtBS: 'Balance Sheet',
+        compareStmtIS: 'Income Statement',
+        compareStmtCF: 'Cash Flow',
+        compareStmtCI: 'Comp. Income',
+        compareModeMerged: 'Merged Table',
+        compareModeSplit: 'Split-Screen',
+        compareYears3: 'Last 3Y',
+        compareYears5: 'Last 5Y',
+        compareYearsAll: 'All Years',
+        compareSyncScrollLabel: 'Sync Scroll',
+        compareDiffHeader: 'Diff % (A vs B)',
+        compareChipHint: (target) => `Click a symbol chip above to set Company ${target}`,
+        comparePaneTitleA: (name, sym) => `Company A: ${name} (${sym})`,
+        comparePaneTitleB: (name, sym) => `Company B: ${name} (${sym})`
+    }
+};
+
+// Standard Financial Line Items Dictionary (Persian -> English)
+const ITEM_FA_TO_EN = {
+    // Balance Sheet
+    'دارایی های غیرجاری': 'Non-Current Assets',
+    'حساب ها و اسناد دریافتنی بلندمدت': 'Long-Term Accounts & Notes Receivable',
+    'دریافتنی های بلندمدت': 'Long-Term Receivables',
+    'سرمایه گذاری های بلند مدت': 'Long-Term Investments',
+    'سرمایه گذاری های بلندمدت': 'Long-Term Investments',
+    'سرمایه گذاری در املاک': 'Investment Property',
+    'دارایی های ثابت مشهود': 'Property, Plant & Equipment (PP&E)',
+    'دارایی های ثابت نامشهود': 'Intangible Assets',
+    'دارایی های نامشهود': 'Intangible Assets',
+    'دارایی مالیات انتقالی': 'Deferred Tax Assets',
+    'سایر دارایی ها': 'Other Non-Current Assets',
+    'جمع دارایی های غیرجاری': 'Total Non-Current Assets',
+    'دارایی های جاری': 'Current Assets',
+    'موجودی نقد': 'Cash and Cash Equivalents',
+    'سرمایه گذاری های کوتاه مدت': 'Short-Term Investments',
+    'دریافتنی های تجاری و سایر دریافتنی ها': 'Trade and Other Receivables',
+    'حساب ها و اسناد دریافتنی تجاری': 'Trade Accounts & Notes Receivable',
+    'سایر حساب ها و اسناد دریافتنی': 'Other Accounts & Notes Receivable',
+    'طلب از شرکت های گروه و شرکت های وابسته': 'Receivables from Related Parties & Group',
+    'طلب از شرکت های گروه و وابسته': 'Receivables from Related Parties',
+    'موجودی مواد و کالا': 'Inventories',
+    'سفارشات': 'Orders in Transit',
+    'پیش پرداخت ها': 'Prepayments',
+    'پیش پرداخت ها و سفارشات': 'Prepayments and Orders',
+    'سفارشات و پیش پرداخت ها': 'Orders and Prepayments',
+    'دارایی های غیرجاری نگهداری شده برای فروش': 'Non-Current Assets Held for Sale',
+    'دارایی های نگهداری شده برای فروش': 'Assets Held for Sale',
+    'جمع دارایی های جاری': 'Total Current Assets',
+    'جمع دارایی ها': 'Total Assets',
+    'حقوق صاحبان سهام': "Shareholders' Equity",
+    'حقوق مالکانه (حقوق صاحبان سهام)': "Shareholders' Equity",
+    'سرمایه': 'Share Capital',
+    'سرمایه ثبت شده': 'Registered Share Capital',
+    'دریافتی بابت افزایش سرمایه': 'Proceeds from Capital Increase',
+    'افزایش سرمایه در جریان': 'Capital Increase in Progress',
+    'صرف سهام': 'Share Premium',
+    'سهام خزانه': 'Treasury Shares',
+    'صرف سهام خزانه': 'Treasury Share Reserve',
+    'اندوخته قانونی': 'Legal Reserve',
+    'سایر اندوخته ها': 'Other Reserves',
+    'مازاد تجدید ارزیابی دارایی ها': 'Asset Revaluation Surplus',
+    'تفاوت تسعیر ارز عملیات خارجی': 'Foreign Currency Translation Reserve',
+    'سود(زیان) انباشته': 'Retained Earnings (Accumulated Deficit)',
+    'جمع حقوق صاحبان سهام': "Total Shareholders' Equity",
+    'جمع حقوق مالکانه': "Total Shareholders' Equity",
+    'بدهی های غیرجاری': 'Non-Current Liabilities',
+    'تسهیلات مالی دریافتی بلندمدت': 'Long-Term Borrowings & Facilities',
+    'تسهیلات مالی بلندمدت': 'Long-Term Financial Facilities',
+    'حساب ها و اسناد پرداختنی بلندمدت': 'Long-Term Accounts & Notes Payable',
+    'پرداختنی های بلندمدت': 'Long-Term Payables',
+    'بدهی مالیات انتقالی': 'Deferred Tax Liabilities',
+    'ذخیره مزایای پایان خدمت کارکنان': 'Employee Severance Benefit Provision',
+    'جمع بدهی های غیرجاری': 'Total Non-Current Liabilities',
+    'بدهی های جاری': 'Current Liabilities',
+    'پرداختنی تجاری و سایر پرداختنی ها': 'Trade and Other Payables',
+    'پرداختنی های تجاری و سایر پرداختنی ها': 'Trade and Other Payables',
+    'حساب ها و اسناد پرداختنی تجاری': 'Trade Accounts & Notes Payable',
+    'بدهی به شرکت های گروه و وابسته': 'Payables to Group & Related Parties',
+    'سایر حساب ها و اسناد پرداختنی': 'Other Accounts & Notes Payable',
+    'مالیات پرداختنی': 'Income Tax Payable',
+    'پیش دریافت ها': 'Advances Received',
+    'پیش دریافت های جاری': 'Current Advances Received',
+    'ذخیره مالیات': 'Tax Provision',
+    'ذخایر': 'Provisions',
+    'سود سهام پرداختنی': 'Dividends Payable',
+    'تسهیلات مالی دریافتی': 'Short-Term Borrowings & Facilities',
+    'تسهیلات مالی': 'Short-Term Financial Facilities',
+    'جمع بدهی های جاری': 'Total Current Liabilities',
+    'جمع بدهی ها': 'Total Liabilities',
+    'جمع بدهی ها و حقوق صاحبان سهام': "Total Liabilities and Shareholders' Equity",
+    'جمع حقوق مالکانه و بدهی ها': "Total Equity and Liabilities",
+
+    // Income Statement
+    'درآمدها و بهای تمام شده عملیاتی': 'Operating Revenues & Cost of Sales',
+    'درآمدهای عملیاتی': 'Operating Revenue (Net Sales)',
+    'بهای تمام شده درآمد های عملیاتی': 'Cost of Goods Sold (COGS)',
+    'بهای تمام شده درآمدهای عملیاتی': 'Cost of Goods Sold (COGS)',
+    'سود(زیان) ناخالص': 'Gross Profit (Loss)',
+    'سایر اقلام عملیاتی و غیرعملیاتی': 'Other Operating & Non-Operating Items',
+    'هزینه های فروش و اداری و عمومی': 'Selling, General & Administrative (SG&A)',
+    'هزینه های فروش، اداری و عمومی': 'Selling, General & Administrative (SG&A)',
+    'هزینه کاهش ارزش دریافتنی ها': 'Impairment Loss on Receivables',
+    'سایر درآمدها': 'Other Operating Income',
+    'سایر درآمدهای عملیاتی': 'Other Operating Income',
+    'سایر هزینه ها': 'Other Operating Expenses',
+    'سایر هزینه های عملیاتی': 'Other Operating Expenses',
+    'خالص سایر درآمدهای عملیاتی': 'Net Other Operating Income',
+    'جمع هزینه ها': 'Total Operating Expenses',
+    'سود(زیان) عملیاتی': 'Operating Income (EBIT)',
+    'هزینه های مالی': 'Finance Costs (Interest Expense)',
+    'سایر درآمدها و هزینه‌های غیرعملیاتی- درآمد سرمایه‌ گذاری‌ها': 'Non-Operating Income — Investment Income',
+    'سایر درآمدها و هزینه های غیرعملیاتی - درآمد سرمایه گذاری ها': 'Non-Operating Income — Investment Income',
+    'سایر درآمدها و هزینه‌های غیرعملیاتی- اقلام متفرقه': 'Non-Operating Income (Expense) — Miscellaneous',
+    'سایر درآمدها و هزینه های غیرعملیاتی - اقلام متفرقه': 'Non-Operating Income (Expense) — Miscellaneous',
+    'سایر درآمدها و هزینه‌های غیرعملیاتی': 'Total Non-Operating Income (Expense)',
+    'سود(زیان) قبل از اقلام غیر مترقبه و اثرات انباشته تغییر در اصول و روش های حسابداری': 'Profit Before Extraordinary Items & Accounting Changes',
+    'سود(زیان) عملیات در حال تداوم قبل از مالیات': 'Profit Before Tax (EBT — Continuing Operations)',
+    'هزینه مالیات بر درآمد': 'Income Tax Expense',
+    'مالیات سال جاری': 'Current Year Income Tax',
+    'مالیات سال های قبل': 'Prior Years Tax Adjustment',
+    'مالیات انتقالی': 'Deferred Income Tax',
+    'سود(زیان) خالص عملیات در حال تداوم': 'Net Profit from Continuing Operations',
+    'سود(زیان) خالص عملیات متوقف شده': 'Net Profit (Loss) from Discontinued Operations',
+    'سود(زیان) خالص': 'Net Income (Profit / Loss)',
+    'تخصیص سود و سود هر سهم': 'Profit Appropriation & Earnings Per Share',
+    'سود(زیان) انباشته ابتدای دوره': 'Beginning Retained Earnings',
+    'سود(زیان) انباشته ابتدای سال': 'Beginning Retained Earnings',
+    'تعدیلات سنواتی': 'Prior Period Adjustments',
+    'سود(زیان) انباشته ابتدای دوره تعدیل شده': 'Adjusted Beginning Retained Earnings',
+    'سود(زیان) انباشته ابتدای سال تعدیل شده': 'Adjusted Beginning Retained Earnings',
+    'سود(زیان) انباشته ابتدای دوره تخصیص نیافته': 'Unappropriated Beginning Retained Earnings',
+    'سود قابل تخصیص': 'Distributable Profit',
+    'انتقال به اندوخته قانونی': 'Transfer to Legal Reserve',
+    'انتقال به سایر اندوخته ها': 'Transfer to Other Reserves',
+    'افزایش سرمایه از محل سود انباشته': 'Capital Increase from Retained Earnings',
+    'سود سهام پیشنهادی': 'Proposed Cash Dividends',
+    'سود سهام مصوب (پیشنهادی)': 'Approved / Proposed Dividends',
+    'پاداش هیئت مدیره': 'Board of Directors Bonus',
+    'جمع تغییرات در سود انباشته': 'Total Changes in Retained Earnings',
+    'سود(زیان) انباشته پایان دوره': 'Ending Retained Earnings',
+    'سود(زیان) انباشته پایان سال': 'Ending Retained Earnings',
+    'عملیاتی (ریال)': 'Operating EPS (IRR)',
+    'غیرعملیاتی (ریال)': 'Non-Operating EPS (IRR)',
+    'سود ناشی از عملیات در حال تداوم هر سهم': 'Continuing Operations EPS (IRR)',
+    'سود ناشی از عملیات متوقف شده هر سهم': 'Discontinued Operations EPS (IRR)',
+    'سود(زیان) پایه هر سهم': 'Basic Earnings Per Share — EPS (IRR)',
+    'سود(زیان) پایه هر سهم (ریال)': 'Basic Earnings Per Share — EPS (IRR)',
+    'سود(زیان) خالص هر سهم': 'Diluted / Net Earnings Per Share (IRR)',
+    'سود(زیان) خالص هر سهم (ریال)': 'Net Earnings Per Share — EPS (IRR)',
+
+    // Cash Flow Statement
+    'جریان های نقدی حاصل از فعالیت های عملیاتی': 'Cash Flows from Operating Activities',
+    'جریان‌های نقدی حاصل از فعالیت‌های عملیاتی': 'Cash Flows from Operating Activities',
+    'جریان خالص نقدی حاصل از فعالیت های عملیاتی قبل از اقلام استثنایی': 'Net Operating Cash Flow Before Exceptional Items',
+    'وجوه نقد حاصل از عملیات': 'Cash Generated from Operations',
+    'دریافت های نقدی از مشتریان': 'Cash Receipts from Customers',
+    'دریافت‌های نقدی از مشتریان': 'Cash Receipts from Customers',
+    'پرداخت های نقدی به تامین کنندگان و کارکنان': 'Cash Paid to Suppliers and Employees',
+    'پرداخت‌های نقدی به فروشندگان و کارکنان': 'Cash Paid to Suppliers and Employees',
+    'سود تسهیلات مالی پرداختی': 'Interest & Finance Charges Paid',
+    'سود و کارمزد پرداختی بابت تسهیلات مالی': 'Interest & Finance Charges Paid',
+    'مالیات بر درآمد پرداختی': 'Income Taxes Paid',
+    'مالیات بر درآمد پرداخت شده': 'Income Taxes Paid',
+    'خالص جریان نقدی ناشی از فعالیت های عملیاتی': 'Net Cash Provided by Operating Activities',
+    'خالص جریان ورود (خروج) نقد ناشی از فعالیت‌های عملیاتی': 'Net Cash Provided by Operating Activities',
+    'جریان های نقدی حاصل از فعالیت های سرمایه گذاری': 'Cash Flows from Investing Activities',
+    'جریان‌های نقدی حاصل از فعالیت‌های سرمایه‌گذاری': 'Cash Flows from Investing Activities',
+    'وجوه دریافتی بابت فروش دارایی های ثابت مشهود': 'Proceeds from Sale of PP&E',
+    'وجوه دریافتی از فروش دارایی‌های ثابت مشهود': 'Proceeds from Sale of PP&E',
+    'وجوه پرداختی بابت خرید دارایی های ثابت مشهود': 'Capital Expenditures — Purchase of PP&E',
+    'وجوه پرداختی بابت خرید دارایی‌های ثابت مشهود': 'Capital Expenditures — Purchase of PP&E',
+    'وجوه دریافتی بابت فروش دارایی های نامشهود': 'Proceeds from Sale of Intangible Assets',
+    'وجوه پرداختی بابت خرید دارایی های نامشهود': 'Purchase of Intangible Assets',
+    'وجوه پرداختی بابت خرید دارایی‌های نامشهود': 'Purchase of Intangible Assets',
+    'وجوه دریافتی بابت فروش سرمایه گذاری ها': 'Proceeds from Sale of Investments',
+    'وجوه دریافتی از فروش سرمایه‌گذاری‌ها': 'Proceeds from Sale of Investments',
+    'وجوه پرداختی بابت تحصیل سرمایه گذاری ها': 'Purchase of Investments',
+    'وجوه پرداختی بابت خرید سرمایه‌گذاری‌ها': 'Purchase of Investments',
+    'سود سهام دریافتی': 'Dividends Received',
+    'سود دریافتی بابت سپرده ها و سرمایه گذاری ها': 'Interest Received on Deposits & Investments',
+    'سود تسهیلات و سپرده‌های بانکی دریافتی': 'Interest Received on Bank Deposits',
+    'خالص جریان نقدی ناشی از فعالیت های سرمایه گذاری': 'Net Cash Used in Investing Activities',
+    'خالص جریان ورود (خروج) نقد ناشی از فعالیت‌های سرمایه‌گذاری': 'Net Cash Used in Investing Activities',
+    'جریان های نقدی حاصل از فعالیت های تامین مالی': 'Cash Flows from Financing Activities',
+    'جریان‌های نقدی حاصل از فعالیت‌های تأمین مالی': 'Cash Flows from Financing Activities',
+    'وجوه دریافتی ناشی از افزایش سرمایه': 'Proceeds from Share Capital Increase',
+    'وجوه دریافتی حاصل از افزایش سرمایه': 'Proceeds from Share Capital Increase',
+    'وجوه دریافتی حاصل از تسهیلات مالی': 'Proceeds from Borrowings & Facilities',
+    'بازپرداخت اصل تسهیلات مالی': 'Repayment of Borrowings Principal',
+    'سود سهام پرداختی': 'Dividends Paid to Shareholders',
+    'سود سهام پرداخت شده': 'Dividends Paid to Shareholders',
+    'سایر جریان های نقدی فعالیت های تامین مالی': 'Other Financing Cash Flows',
+    'خالص جریان نقدی ناشی از فعالیت های تامین مالی': 'Net Cash from Financing Activities',
+    'خالص جریان ورود (خروج) نقد ناشی از فعالیت‌های تأمین مالی': 'Net Cash from Financing Activities',
+    'خالص افزایش (کاهش) در موجودی نقد': 'Net Increase (Decrease) in Cash',
+    'موجودی نقد در ابتدای دوره': 'Cash and Cash Equivalents at Beginning of Year',
+    'مانده موجودی نقد در ابتدای سال': 'Cash and Cash Equivalents at Beginning of Year',
+    'تاثیر تغییرات نرخ ارز بر موجودی نقد': 'Effect of Exchange Rate Changes on Cash',
+    'اثرات تغییرات نرخ ارز': 'Effect of Exchange Rate Changes on Cash',
+    'موجودی نقد در پایان دوره': 'Cash and Cash Equivalents at End of Year',
+    'مانده موجودی نقد در پایان سال': 'Cash and Cash Equivalents at End of Year',
+
+    // Comprehensive Income
+    'مازاد تجدید ارزیابی دارایی های ثابت مشهود': 'Revaluation Surplus on PP&E',
+    'تغییرات ارزش منصفانه سرمایه گذاری ها': 'Fair Value Changes on Investments',
+    'سود(زیان) تحقق نیافته ناشی از تغییر ارزش سرمایه گذاری ها': 'Unrealized Gain (Loss) on Investments',
+    'سود(زیان) اکتواریایی طرح های مزایای بازنشستگی': 'Actuarial Gain (Loss) on Retirement Plans',
+    'سود(زیان) اکتواریایی مزایای پایان خدمت کارکنان': 'Actuarial Gain (Loss) on Severance Benefits',
+    'سایر اقلام سود و زیان جامع': 'Other Comprehensive Income Items',
+    'جمع سایر اقلام سود و زیان جامع سال': 'Total Other Comprehensive Income',
+    'جمع سایر اقلام سود و زیان جامع': 'Total Other Comprehensive Income',
+    'سود(زیان) جامع سال': 'Total Comprehensive Income for the Year'
+};
+
+const NORMALIZED_ITEM_FA_TO_EN = {};
+function normalizeFa(text) {
+    if (!text) return '';
+    return String(text)
+        .replace(/ي/g, 'ی')
+        .replace(/ى/g, 'ی')
+        .replace(/ك/g, 'ک')
+        .replace(/\u200c/g, ' ')
+        .replace(/‌/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+Object.entries(ITEM_FA_TO_EN).forEach(([k, v]) => {
+    NORMALIZED_ITEM_FA_TO_EN[normalizeFa(k)] = v;
+});
+
+function translateLineItem(label) {
+    if (!label) return '—';
+    if (state.lang !== 'en') return label;
+    const norm = normalizeFa(label);
+    if (NORMALIZED_ITEM_FA_TO_EN[norm]) {
+        return NORMALIZED_ITEM_FA_TO_EN[norm];
+    }
+    return label;
+}
+
+function t(key, ...args) {
+    const dict = UI_I18N[state.lang] || UI_I18N.fa;
+    const val = dict[key];
+    if (typeof val === 'function') return val(...args);
+    return val !== undefined ? val : key;
+}
+
+function toDisplayDigits(str) {
+    if (str === null || str === undefined) return '';
+    const s = String(str);
+    if (state.lang === 'en') return s;
+    return s.replace(/[0-9]/g, (d) => EN_TO_FA_DIGITS[d] || d);
+}
+
+function applyLanguageSettings() {
+    const isEn = state.lang === 'en';
+    document.documentElement.lang = isEn ? 'en' : 'fa';
+    document.documentElement.dir = isEn ? 'ltr' : 'rtl';
+    document.title = t('pageTitle');
+
+    $('#techPageBtnText').textContent = t('techPageBtn');
+    $('#symbolInput').placeholder = t('symbolPlaceholder');
+    $('#modeStandaloneBtn').textContent = t('standalone');
+    $('#modeConsBtn').textContent = t('consolidated');
+    $('#loadBtn').textContent = t('loadBtn');
+    $('#syncBtnText').textContent = t('syncBtn');
+    $('#langPrefixLabel').textContent = t('langPrefix');
+    $('#digitLangLabel').textContent = t('langName');
+    $('#exportExcelBtnText').textContent = t('exportExcel');
+    $('#firmsStripLabel').textContent = t('firmsStripLabel');
+    $('#tabBS').textContent = t('tabBS');
+    $('#tabIS').textContent = t('tabIS');
+    $('#tabCF').textContent = t('tabCF');
+    $('#tabCI').textContent = t('tabCI');
+    $('#tabTrendsText').textContent = t('tabTrends');
+    if ($('#tabCompareText')) $('#tabCompareText').textContent = t('tabCompare');
+    $('#rowFilterInput').placeholder = t('filterPlaceholder');
+
+    const inDbCount = state.companies.filter(c => c.in_db).length;
+    $('#firmsCount').textContent = t('firmsInDb', toDisplayDigits(inDbCount));
+}
+
+function formatAccountingNumber(v) {
+    if (v === null || v === undefined || v === '') return null;
+    const n = Number(v);
+    if (Number.isNaN(n)) return toDisplayDigits(String(v));
+    const absStr = Math.abs(n).toLocaleString('en-US', { maximumFractionDigits: 2 });
+    const formatted = n < 0 ? `(${absStr})` : absStr;
+    return toDisplayDigits(formatted);
+}
+
+function formatCompactRial(v) {
+    if (v === null || v === undefined || Number.isNaN(Number(v))) return '—';
+    const n = Number(v);
+    const abs = Math.abs(n);
+    let out = '';
+    if (abs >= 1e9) {
+        out = (n / 1e9).toFixed(2) + ' B';
+    } else if (abs >= 1e6) {
+        out = (n / 1e6).toFixed(2) + ' M';
+    } else if (abs >= 1e3) {
+        out = (n / 1e3).toFixed(1) + ' K';
+    } else {
+        out = n.toLocaleString('en-US');
+    }
+    return toDisplayDigits(out);
+}
+
+function findRowByCandidates(rows, exactCandidates, partialCandidates = []) {
+    if (!Array.isArray(rows)) return null;
+    const normExact = exactCandidates.map(normalizeFa);
+    for (const target of normExact) {
+        const hit = rows.find(r => !r.isSection && normalizeFa(r.Item) === target);
+        if (hit) return hit;
+    }
+    const normPartial = partialCandidates.map(normalizeFa);
+    for (const part of normPartial) {
+        const hit = rows.find(r => !r.isSection && normalizeFa(r.Item).includes(part));
+        if (hit) return hit;
+    }
+    return null;
+}
+
+function setBusy(b, msg) {
+    state.busy = b;
+    $('#loadBtn').disabled = b;
+    $('#syncBtn').disabled = b;
+    if (b) {
+        $('#contentArea').innerHTML = `
+            <div class="spinner-wrap">
+                <div class="spinner-border text-primary" role="status"></div>
+                <div class="fw-semibold">${msg || ''}</div>
+                <div class="text-muted small">${t('loadingSub')}</div>
+            </div>`;
+    }
+}
+
+function renderFirmStrip() {
+    const strip = $('#firmsStrip');
+    const isCompare = state.currentStatement === 'Compare';
+    const labelHtml = `<span class="firms-strip-label" id="firmsStripLabel">${t('firmsStripLabel')}</span>`;
+    const chipsHtml = state.companies.map(c => {
+        const isActive = isCompare
+            ? (c.symbol === state.compareSymbolA || c.symbol === state.compareSymbolB)
+            : (c.symbol === state.currentSymbol);
+        const dotClass = c.in_db ? 'db-dot ready' : 'db-dot';
+        const yrBadge = c.report_count > 0 ? t('yearsSuffix', toDisplayDigits(c.report_count)) : '';
+        let tagBadge = '';
+        if (isCompare && c.symbol === state.compareSymbolA) tagBadge = ' [A]';
+        if (isCompare && c.symbol === state.compareSymbolB) tagBadge += ' [B]';
+        return `<button type="button" class="firm-chip ${isActive ? 'active' : ''}" data-sym="${c.symbol}" title="${c.name || c.symbol}">
+            <span class="${dotClass}"></span>
+            <span>${c.symbol}${yrBadge}${tagBadge}</span>
+        </button>`;
+    }).join('');
+    strip.innerHTML = labelHtml + chipsHtml;
+
+    strip.querySelectorAll('.firm-chip').forEach(btn => {
+        btn.addEventListener('click', () => {
+            if (state.busy) return;
+            const sym = btn.dataset.sym;
+            if (state.currentStatement === 'Compare') {
+                if (state.compareActiveTarget === 'A') {
+                    state.compareSymbolA = sym;
+                    state.compareActiveTarget = 'B';
+                } else {
+                    state.compareSymbolB = sym;
+                    state.compareActiveTarget = 'A';
+                }
+                loadComparison(state.compareSymbolA, state.compareSymbolB, state.compareBaseStatement, state.consolidated);
+            } else {
+                $('#symbolInput').value = sym;
+                loadStatement(sym, state.currentStatement, state.consolidated);
+            }
+        });
+    });
+}
+
+async function refreshCompanies() {
+    try {
+        const res = await fetch('/api/financials/symbols');
+        const data = await res.json();
+        state.companies = data.companies || [];
+        const inDbCount = state.companies.filter(c => c.in_db).length;
+        $('#firmsCount').textContent = t('firmsInDb', toDisplayDigits(inDbCount));
+        $('#symbolDatalist').innerHTML = state.companies.map(c =>
+            `<option value="${c.symbol}">${c.name || c.symbol}</option>`
+        ).join('');
+        renderFirmStrip();
+    } catch (e) {
+        console.warn('Failed to load companies:', e);
+    }
+}
+
+function destroyTrendCharts() {
+    if (mainTrendChartInstance) {
+        mainTrendChartInstance.destroy();
+        mainTrendChartInstance = null;
+    }
+    if (marginTrendChartInstance) {
+        marginTrendChartInstance.destroy();
+        marginTrendChartInstance = null;
+    }
+}
+
+/* ============================================================================
+   Compute & Render Summary Ratio Cards (Current Ratio, ROE, Debt-to-Equity, ROA)
+   ============================================================================ */
+function buildSummaryRatioCardsHtml(symbol, consolidated, fallbackColumns) {
+    const bsKey = `${symbol}_${consolidated}_Balance Sheet`;
+    const isKey = `${symbol}_${consolidated}_Income Statement`;
+    const bsData = state.statementCache[bsKey];
+    const isData = state.statementCache[isKey];
+
+    const cols = (bsData && bsData.columns && bsData.columns.length)
+        ? bsData.columns
+        : ((isData && isData.columns && isData.columns.length) ? isData.columns : (fallbackColumns || []));
+
+    if (!cols.length) return '';
+
+    const latestY = cols[0];
+    const prevY = cols.length > 1 ? cols[1] : null;
+
+    const bsRows = bsData ? bsData.rows : [];
+    const isRows = isData ? isData.rows : [];
+
+    // Locate Balance Sheet items
+    const currAssetsRow = findRowByCandidates(bsRows, ['جمع دارایی های جاری'], ['جمع دارایی های جاری']);
+    const currLiabRow = findRowByCandidates(bsRows, ['جمع بدهی های جاری'], ['جمع بدهی های جاری']);
+    const totAssetsRow = findRowByCandidates(bsRows, ['جمع دارایی ها'], ['جمع دارایی ها']);
+    const totLiabRow = findRowByCandidates(bsRows, ['جمع بدهی ها'], ['جمع بدهی ها']);
+    const totEquityRow = findRowByCandidates(
+        bsRows,
+        ['جمع حقوق صاحبان سهام', 'جمع حقوق مالکانه'],
+        ['جمع حقوق صاحبان سهام', 'جمع حقوق مالکانه']
+    );
+
+    // Locate Income Statement items
+    const netIncomeRow = findRowByCandidates(
+        isRows,
+        ['سود(زیان) خالص', 'سود(زیان) خالص عملیات در حال تداوم'],
+        ['سود(زیان) خالص']
+    );
+    const revRow = findRowByCandidates(
+        isRows,
+        ['درآمدهای عملیاتی', 'فروش خالص', 'جمع درآمدهای عملیاتی'],
+        ['درآمدهای عملیاتی']
+    );
+
+    function getVal(row, yr) {
+        if (!row || !yr || row[yr] === null || row[yr] === undefined) return null;
+        const n = Number(row[yr]);
+        return Number.isNaN(n) ? null : n;
+    }
+
+    function getEquity(yr) {
+        const eq = getVal(totEquityRow, yr);
+        if (eq !== null && eq !== 0) return eq;
+        const ta = getVal(totAssetsRow, yr);
+        const tl = getVal(totLiabRow, yr);
+        if (ta !== null && tl !== null) return ta - tl;
+        return null;
+    }
+
+    // 1. Current Ratio = Current Assets / Current Liabilities
+    const caNow = getVal(currAssetsRow, latestY);
+    const clNow = getVal(currLiabRow, latestY);
+    const currentRatioNow = (caNow !== null && clNow && clNow !== 0) ? (caNow / Math.abs(clNow)) : null;
+
+    const caPrev = getVal(currAssetsRow, prevY);
+    const clPrev = getVal(currLiabRow, prevY);
+    const currentRatioPrev = (caPrev !== null && clPrev && clPrev !== 0) ? (caPrev / Math.abs(clPrev)) : null;
+
+    // 2. ROE (%) = (Net Income / Total Equity) * 100
+    const niNow = getVal(netIncomeRow, latestY);
+    const eqNow = getEquity(latestY);
+    const roeNow = (niNow !== null && eqNow && eqNow !== 0) ? ((niNow / Math.abs(eqNow)) * 100) : null;
+
+    const niPrev = getVal(netIncomeRow, prevY);
+    const eqPrev = getEquity(prevY);
+    const roePrev = (niPrev !== null && eqPrev && eqPrev !== 0) ? ((niPrev / Math.abs(eqPrev)) * 100) : null;
+
+    // 3. Debt-to-Equity (D/E) = Total Liabilities / Total Equity
+    const tlNow = getVal(totLiabRow, latestY);
+    const taNow = getVal(totAssetsRow, latestY);
+    const deNow = (tlNow !== null && eqNow && eqNow !== 0) ? (Math.abs(tlNow) / Math.abs(eqNow)) : null;
+
+    const tlPrev = getVal(totLiabRow, prevY);
+    const dePrev = (tlPrev !== null && eqPrev && eqPrev !== 0) ? (Math.abs(tlPrev) / Math.abs(eqPrev)) : null;
+    const debtToAssetsNow = (tlNow !== null && taNow && taNow !== 0) ? ((Math.abs(tlNow) / Math.abs(taNow)) * 100) : null;
+
+    // 4. ROA (%) = (Net Income / Total Assets) * 100 & Net Profit Margin (%)
+    const roaNow = (niNow !== null && taNow && taNow !== 0) ? ((niNow / Math.abs(taNow)) * 100) : null;
+    const taPrev = getVal(totAssetsRow, prevY);
+    const roaPrev = (niPrev !== null && taPrev && taPrev !== 0) ? ((niPrev / Math.abs(taPrev)) * 100) : null;
+    const revNow = getVal(revRow, latestY);
+    const netMarginNow = (niNow !== null && revNow && revNow > 0) ? ((niNow / revNow) * 100) : null;
+
+    function fmtRatio(v, suffix = 'x') {
+        if (v === null || v === undefined || Number.isNaN(v)) return '—';
+        return toDisplayDigits(v.toFixed(2) + suffix);
+    }
+
+    function fmtDelta(nowVal, prevVal, isPct = false, inverseColor = false) {
+        if (nowVal === null || prevVal === null) return '';
+        const diff = nowVal - prevVal;
+        const sign = diff > 0 ? '+' : '';
+        const good = inverseColor ? diff <= 0 : diff >= 0;
+        const cls = good ? 'growth-pos' : 'growth-neg';
+        const unit = isPct ? '%' : 'x';
+        return `<span class="ratio-card-delta ${cls}">${toDisplayDigits(`${sign}${diff.toFixed(2)}${unit}`)}</span>`;
+    }
+
+    const fyLabel = t('fiscalYearTag', toDisplayDigits(latestY));
+
+    return `
+        <div class="ratios-summary-row">
+            <!-- Card 1: Current Ratio -->
+            <div class="ratio-card">
+                <div class="ratio-card-top">
+                    <span class="ratio-card-title">${t('cardCurrentRatio')}</span>
+                    <span class="ratio-card-tag">${fyLabel}</span>
+                </div>
+                <div class="ratio-card-main">
+                    <span class="ratio-card-val">${fmtRatio(currentRatioNow, 'x')}</span>
+                    ${fmtDelta(currentRatioNow, currentRatioPrev, false, false)}
+                </div>
+                <div class="ratio-card-foot">
+                    <span>${t('cardCurrentRatioSub')}</span>
+                    <span>${t('prevYearLabel')} <strong>${fmtRatio(currentRatioPrev, 'x')}</strong></span>
+                </div>
+            </div>
+
+            <!-- Card 2: ROE -->
+            <div class="ratio-card">
+                <div class="ratio-card-top">
+                    <span class="ratio-card-title">${t('cardROE')}</span>
+                    <span class="ratio-card-tag" style="color:#0d9488;background:#f0fdfa;">${fyLabel}</span>
+                </div>
+                <div class="ratio-card-main">
+                    <span class="ratio-card-val">${fmtRatio(roeNow, '%')}</span>
+                    ${fmtDelta(roeNow, roePrev, true, false)}
+                </div>
+                <div class="ratio-card-foot">
+                    <span>${t('cardROESub')}</span>
+                    <span>${t('prevYearLabel')} <strong>${fmtRatio(roePrev, '%')}</strong></span>
+                </div>
+            </div>
+
+            <!-- Card 3: Debt-to-Equity -->
+            <div class="ratio-card">
+                <div class="ratio-card-top">
+                    <span class="ratio-card-title">${t('cardDE')}</span>
+                    <span class="ratio-card-tag" style="color:#d97706;background:#fffbeb;">${fyLabel}</span>
+                </div>
+                <div class="ratio-card-main">
+                    <span class="ratio-card-val">${fmtRatio(deNow, 'x')}</span>
+                    ${fmtDelta(deNow, dePrev, false, true)}
+                </div>
+                <div class="ratio-card-foot">
+                    <span>${t('debtAssetShort')} <strong>${fmtRatio(debtToAssetsNow, '%')}</strong></span>
+                    <span>${t('prevYearLabel')} <strong>${fmtRatio(dePrev, 'x')}</strong></span>
+                </div>
+            </div>
+
+            <!-- Card 4: ROA & Net Profit Margin -->
+            <div class="ratio-card">
+                <div class="ratio-card-top">
+                    <span class="ratio-card-title">${t('cardROA')}</span>
+                    <span class="ratio-card-tag" style="color:#4f46e5;background:#eef2ff;">${fyLabel}</span>
+                </div>
+                <div class="ratio-card-main">
+                    <span class="ratio-card-val">${fmtRatio(roaNow, '%')}</span>
+                    ${fmtDelta(roaNow, roaPrev, true, false)}
+                </div>
+                <div class="ratio-card-foot">
+                    <span>${t('netMarginShort')} <strong>${fmtRatio(netMarginNow, '%')}</strong></span>
+                    <span>${t('prevYearLabel')} <strong>${fmtRatio(roaPrev, '%')}</strong></span>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function renderTable(data) {
+    destroyTrendCharts();
+    state.lastData = data;
+    const columns = data.columns || [];
+    const allRows = data.rows || [];
+    const q = (state.rowFilter || '').trim().toLowerCase();
+
+    const rows = !q
+        ? allRows
+        : allRows.filter(r => {
+            if (r.isSection) return true;
+            const rawItem = String(r.Item || '').toLowerCase();
+            const transItem = String(translateLineItem(r.Item) || '').toLowerCase();
+            return rawItem.includes(q) || transItem.includes(q);
+        });
+
+    if (!rows.length || !columns.length) {
+        $('#contentArea').innerHTML = `
+            <div class="empty-state">
+                <h5>${t('emptyTitle', data.symbol || state.currentSymbol)}</h5>
+                <p>${t('emptyDesc')}</p>
+            </div>`;
+        return;
+    }
+
+    const summaryCardsHtml = buildSummaryRatioCardsHtml(
+        data.symbol || state.currentSymbol,
+        state.consolidated,
+        columns
+    );
+
+    let thead = `<thead><tr><th>${t('colLineItem')}</th>`;
+    columns.forEach(col => {
+        thead += `<th>${t('colFiscalYear', toDisplayDigits(col))}</th>`;
+    });
+    thead += '</tr></thead>';
+
+    let tbody = '<tbody>';
+    rows.forEach(r => {
+        const itemLabel = translateLineItem(r.Item || '—');
+        if (r.isSection) {
+            tbody += `<tr class="row-section"><td>${itemLabel}</td>`;
+            columns.forEach(() => {
+                tbody += '<td></td>';
+            });
+            tbody += '</tr>';
+            return;
+        }
+
+        const trClass = r.isTotal ? 'row-total' : '';
+        tbody += `<tr class="${trClass}"><td>${itemLabel}</td>`;
+        columns.forEach(col => {
+            const raw = r[col];
+            const formatted = formatAccountingNumber(raw);
+            if (formatted === null) {
+                tbody += '<td class="num empty">—</td>';
+            } else {
+                const isNeg = typeof raw === 'number' ? raw < 0 : Number(raw) < 0;
+                tbody += `<td class="num ${isNeg ? 'negative' : ''}">${formatted}</td>`;
+            }
+        });
+        tbody += '</tr>';
+    });
+    tbody += '</tbody>';
+
+    $('#contentArea').innerHTML = `
+        ${summaryCardsHtml}
+        <div class="table-card">
+            <div class="table-scroll">
+                <table class="fin-table">${thead}${tbody}</table>
+            </div>
+        </div>`;
+}
+
+/* ============================================================================
+   5-Year Historical Financial Trends Renderer (Revenue, Net Income, Margins)
+   ============================================================================ */
+function renderTrendsView(incomeData) {
+    destroyTrendCharts();
+    state.lastData = incomeData;
+
+    const allColsDesc = incomeData.columns || [];
+    const rows = incomeData.rows || [];
+
+    if (!allColsDesc.length || !rows.length) {
+        $('#contentArea').innerHTML = `
+            <div class="empty-state">
+                <h5>${t('emptyTitle', incomeData.symbol || state.currentSymbol)}</h5>
+                <p>${t('emptyDesc')}</p>
+            </div>`;
+        return;
+    }
+
+    const sliceCount = state.trendsYearsCount === 0 ? allColsDesc.length : Math.min(state.trendsYearsCount, allColsDesc.length);
+    const yearsChron = allColsDesc.slice(0, sliceCount).reverse();
+
+    const revRow = findRowByCandidates(
+        rows,
+        ['درآمدهای عملیاتی', 'فروش خالص', 'جمع درآمدهای عملیاتی'],
+        ['درآمدهای عملیاتی', 'درآمد عملیاتی']
+    );
+    const grossRow = findRowByCandidates(
+        rows,
+        ['سود(زیان) ناخالص', 'سود ناخالص'],
+        ['ناخالص']
+    );
+    const opRow = findRowByCandidates(
+        rows,
+        ['سود(زیان) عملیاتی', 'سود عملیاتی'],
+        ['سود(زیان) عملیاتی']
+    );
+    const netRow = findRowByCandidates(
+        rows,
+        ['سود(زیان) خالص', 'سود(زیان) خالص عملیات در حال تداوم'],
+        ['سود(زیان) خالص']
+    );
+
+    const revSeries = yearsChron.map(y => (revRow && revRow[y] !== null && revRow[y] !== undefined) ? Number(revRow[y]) : null);
+    const grossSeries = yearsChron.map(y => (grossRow && grossRow[y] !== null && grossRow[y] !== undefined) ? Number(grossRow[y]) : null);
+    const opSeries = yearsChron.map(y => (opRow && opRow[y] !== null && opRow[y] !== undefined) ? Number(opRow[y]) : null);
+    const netSeries = yearsChron.map(y => (netRow && netRow[y] !== null && netRow[y] !== undefined) ? Number(netRow[y]) : null);
+
+    const grossMarginSeries = yearsChron.map((_, i) => {
+        const r = revSeries[i];
+        const g = grossSeries[i];
+        return (r && r > 0 && g !== null) ? Number(((g / r) * 100).toFixed(2)) : null;
+    });
+    const opMarginSeries = yearsChron.map((_, i) => {
+        const r = revSeries[i];
+        const o = opSeries[i];
+        return (r && r > 0 && o !== null) ? Number(((o / r) * 100).toFixed(2)) : null;
+    });
+    const netMarginSeries = yearsChron.map((_, i) => {
+        const r = revSeries[i];
+        const n = netSeries[i];
+        return (r && r > 0 && n !== null) ? Number(((n / r) * 100).toFixed(2)) : null;
+    });
+
+    const lastIdx = yearsChron.length - 1;
+    const prevIdx = yearsChron.length - 2;
+    const firstIdx = 0;
+    const latestYear = yearsChron[lastIdx];
+
+    const latestRev = revSeries[lastIdx];
+    const prevRev = prevIdx >= 0 ? revSeries[prevIdx] : null;
+    const firstRev = revSeries[firstIdx];
+    const revYoY = (latestRev !== null && prevRev && prevRev > 0)
+        ? (((latestRev - prevRev) / Math.abs(prevRev)) * 100)
+        : null;
+    const revCagr = (latestRev && firstRev && firstRev > 0 && yearsChron.length > 1)
+        ? ((Math.pow(latestRev / firstRev, 1 / (yearsChron.length - 1)) - 1) * 100)
+        : null;
+
+    const latestNet = netSeries[lastIdx];
+    const prevNet = prevIdx >= 0 ? netSeries[prevIdx] : null;
+    const firstNet = netSeries[firstIdx];
+    const netYoY = (latestNet !== null && prevNet && prevNet !== 0)
+        ? (((latestNet - prevNet) / Math.abs(prevNet)) * 100)
+        : null;
+    const netCagr = (latestNet && latestNet > 0 && firstNet && firstNet > 0 && yearsChron.length > 1)
+        ? ((Math.pow(latestNet / firstNet, 1 / (yearsChron.length - 1)) - 1) * 100)
+        : null;
+
+    const latestNetMargin = netMarginSeries[lastIdx];
+    const validNetMargins = netMarginSeries.filter(v => v !== null);
+    const avgNetMargin = validNetMargins.length
+        ? (validNetMargins.reduce((a, b) => a + b, 0) / validNetMargins.length)
+        : null;
+
+    const latestGrossMargin = grossMarginSeries[lastIdx];
+    const latestOpMargin = opMarginSeries[lastIdx];
+
+    function fmtPct(v, showSign = true) {
+        if (v === null || v === undefined || Number.isNaN(v)) return '—';
+        const sign = (showSign && v > 0) ? '+' : '';
+        return toDisplayDigits(`${sign}${v.toFixed(1)}%`);
+    }
+
+    let summaryThead = `<thead><tr><th>${t('summaryColMetric')}</th>`;
+    yearsChron.forEach(y => {
+        summaryThead += `<th>${t('colFiscalYear', toDisplayDigits(y))}</th>`;
+    });
+    summaryThead += '</tr></thead>';
+
+    function buildSummaryRow(label, vals, isPercent = false, isHighlight = false) {
+        let tr = `<tr class="${isHighlight ? 'row-total' : ''}"><td>${label}</td>`;
+        vals.forEach(v => {
+            if (v === null || v === undefined || Number.isNaN(v)) {
+                tr += '<td class="num empty">—</td>';
+            } else if (isPercent) {
+                const cls = v < 0 ? 'negative' : '';
+                tr += `<td class="num ${cls}">${toDisplayDigits(v.toFixed(2) + '%')}</td>`;
+            } else {
+                const cls = v < 0 ? 'negative' : '';
+                tr += `<td class="num ${cls}">${formatAccountingNumber(v)}</td>`;
+            }
+        });
+        tr += '</tr>';
+        return tr;
+    }
+
+    const revYoYSeries = yearsChron.map((_, i) => {
+        if (i === 0 || !revSeries[i - 1] || revSeries[i] === null) return null;
+        return ((revSeries[i] - revSeries[i - 1]) / Math.abs(revSeries[i - 1])) * 100;
+    });
+    const netYoYSeries = yearsChron.map((_, i) => {
+        if (i === 0 || !netSeries[i - 1] || netSeries[i] === null) return null;
+        return ((netSeries[i] - netSeries[i - 1]) / Math.abs(netSeries[i - 1])) * 100;
+    });
+
+    const summaryTbody = `<tbody>
+        ${buildSummaryRow(t('summaryRowRev'), revSeries, false, true)}
+        ${buildSummaryRow(t('summaryRowGross'), grossSeries, false, false)}
+        ${buildSummaryRow(t('summaryRowOp'), opSeries, false, false)}
+        ${buildSummaryRow(t('summaryRowNet'), netSeries, false, true)}
+        <tr class="row-section"><td>${t('summarySectionRatios')}</td>${yearsChron.map(() => '<td></td>').join('')}</tr>
+        ${buildSummaryRow(t('summaryRowGrossMargin'), grossMarginSeries, true, false)}
+        ${buildSummaryRow(t('summaryRowOpMargin'), opMarginSeries, true, false)}
+        ${buildSummaryRow(t('summaryRowNetMargin'), netMarginSeries, true, true)}
+        ${buildSummaryRow(t('summaryRowRevYoY'), revYoYSeries, true, false)}
+        ${buildSummaryRow(t('summaryRowNetYoY'), netYoYSeries, true, false)}
+    </tbody>`;
+
+    const modeLabel = state.consolidated ? t('consolidated') : t('standalone');
+    const summaryRatioCardsHtml = buildSummaryRatioCardsHtml(
+        incomeData.symbol || state.currentSymbol,
+        state.consolidated,
+        allColsDesc
+    );
+
+    $('#contentArea').innerHTML = `
+        <div class="trends-container">
+            <!-- Header & Controls -->
+            <div class="trends-header-bar">
+                <div class="trends-title-group">
+                    <h4>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.2"><path d="M3 3v18h18"/><path d="M18 9l-5 5-3-3-4 4"/></svg>
+                        <span>${t('trendsHeaderTitle', incomeData.company_name || incomeData.symbol, incomeData.symbol)}</span>
+                    </h4>
+                    <p>${t('trendsHeaderSub', toDisplayDigits(yearsChron[0]), toDisplayDigits(latestYear), modeLabel)}</p>
+                </div>
+
+                <div class="trends-controls">
+                    <div class="mode-switch" id="trendsRangeSwitch">
+                        <button type="button" class="mode-btn ${state.trendsYearsCount === 5 ? 'active' : ''}" data-yrs="5">${t('last5Years')}</button>
+                        <button type="button" class="mode-btn ${state.trendsYearsCount === 0 ? 'active' : ''}" data-yrs="0">${t('allYears', toDisplayDigits(allColsDesc.length))}</button>
+                    </div>
+
+                    <button type="button" class="metric-toggle-btn ${state.trendsSeries.revenue ? 'active' : ''}" data-series="revenue">
+                        <span class="swatch" style="background:#2563eb;"></span>
+                        <span>${t('seriesRev')}</span>
+                    </button>
+                    <button type="button" class="metric-toggle-btn ${state.trendsSeries.grossProfit ? 'active' : ''}" data-series="grossProfit">
+                        <span class="swatch" style="background:#6366f1;"></span>
+                        <span>${t('seriesGross')}</span>
+                    </button>
+                    <button type="button" class="metric-toggle-btn ${state.trendsSeries.operatingProfit ? 'active' : ''}" data-series="operatingProfit">
+                        <span class="swatch" style="background:#0ea5e9;"></span>
+                        <span>${t('seriesOp')}</span>
+                    </button>
+                    <button type="button" class="metric-toggle-btn ${state.trendsSeries.netIncome ? 'active' : ''}" data-series="netIncome">
+                        <span class="swatch" style="background:#0d9488;"></span>
+                        <span>${t('seriesNet')}</span>
+                    </button>
+                    <button type="button" class="metric-toggle-btn ${state.trendsSeries.netMargin ? 'active' : ''}" data-series="netMargin">
+                        <span class="swatch" style="background:#d97706;"></span>
+                        <span>${t('seriesNetMargin')}</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 4 Executive KPI Cards -->
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <div class="kpi-label">
+                        <span>${t('kpiRevTitle', toDisplayDigits(latestYear))}</span>
+                        <span style="color:#2563eb;">Revenue</span>
+                    </div>
+                    <div class="kpi-value">${formatAccountingNumber(latestRev) || '—'}</div>
+                    <div class="kpi-sub">
+                        <span>${t('yoyGrowth')} <span class="${revYoY !== null && revYoY >= 0 ? 'growth-pos' : 'growth-neg'}">${fmtPct(revYoY)}</span></span>
+                        <span>${t('periodCagr')} <strong>${fmtPct(revCagr)}</strong></span>
+                    </div>
+                </div>
+
+                <div class="kpi-card">
+                    <div class="kpi-label">
+                        <span>${t('kpiNetTitle', toDisplayDigits(latestYear))}</span>
+                        <span style="color:#0d9488;">Net Income</span>
+                    </div>
+                    <div class="kpi-value">${formatAccountingNumber(latestNet) || '—'}</div>
+                    <div class="kpi-sub">
+                        <span>${t('yoyGrowth')} <span class="${netYoY !== null && netYoY >= 0 ? 'growth-pos' : 'growth-neg'}">${fmtPct(netYoY)}</span></span>
+                        <span>${t('periodCagr')} <strong>${fmtPct(netCagr)}</strong></span>
+                    </div>
+                </div>
+
+                <div class="kpi-card">
+                    <div class="kpi-label">
+                        <span>${t('kpiNetMarginTitle', toDisplayDigits(latestYear))}</span>
+                        <span style="color:#d97706;">Net Margin</span>
+                    </div>
+                    <div class="kpi-value">${latestNetMargin !== null ? toDisplayDigits(latestNetMargin.toFixed(2) + '%') : '—'}</div>
+                    <div class="kpi-sub">
+                        <span>${t('periodAvg')} <strong>${avgNetMargin !== null ? toDisplayDigits(avgNetMargin.toFixed(1) + '%') : '—'}</strong></span>
+                        <span>${t('netToSales')}</span>
+                    </div>
+                </div>
+
+                <div class="kpi-card">
+                    <div class="kpi-label">
+                        <span>${t('kpiOpGrossTitle', toDisplayDigits(latestYear))}</span>
+                        <span style="color:#4f46e5;">Operating & Gross</span>
+                    </div>
+                    <div class="kpi-value">${latestOpMargin !== null ? toDisplayDigits(latestOpMargin.toFixed(1) + '%') : '—'} <small style="font-size:13px;color:#64748b;font-weight:500;">${t('operatingWord')}</small></div>
+                    <div class="kpi-sub">
+                        <span>${t('grossMarginLabel')} <strong>${latestGrossMargin !== null ? toDisplayDigits(latestGrossMargin.toFixed(1) + '%') : '—'}</strong></span>
+                        <span>${t('yearsWindow', toDisplayDigits(yearsChron.length))}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interactive Dual-Chart Grid -->
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <div class="chart-card-header">
+                        <div>
+                            <div class="chart-card-title">${t('chart1Title')}</div>
+                            <div class="chart-card-subtitle">${t('chart1Sub')}</div>
+                        </div>
+                    </div>
+                    <div class="chart-canvas-wrap">
+                        <canvas id="mainTrendChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-card">
+                    <div class="chart-card-header">
+                        <div>
+                            <div class="chart-card-title">${t('chart2Title')}</div>
+                            <div class="chart-card-subtitle">${t('chart2Sub', toDisplayDigits(yearsChron.length))}</div>
+                        </div>
+                    </div>
+                    <div class="chart-canvas-wrap">
+                        <canvas id="marginTrendChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Key Financial Ratios Summary Row Before Summary Table -->
+            ${summaryRatioCardsHtml}
+
+            <!-- 5-Year Comparative Summary Table -->
+            <div class="table-card">
+                <div class="table-scroll" style="max-height: none;">
+                    <table class="fin-table">${summaryThead}${summaryTbody}</table>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Wire range buttons
+    document.querySelectorAll('#trendsRangeSwitch .mode-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            state.trendsYearsCount = Number(btn.dataset.yrs || 5);
+            renderTrendsView(incomeData);
+        });
+    });
+
+    // Wire series toggles
+    document.querySelectorAll('.metric-toggle-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const key = btn.dataset.series;
+            state.trendsSeries[key] = !state.trendsSeries[key];
+            renderTrendsView(incomeData);
+        });
+    });
+
+    // Instantiate Chart.js charts with Unified Vazirmatn font
+    const labels = yearsChron.map(y => t('yearPrefix', toDisplayDigits(y)));
+    const isRtl = state.lang === 'fa';
+    const chartFontFamily = "'Vazirmatn', -apple-system, BlinkMacSystemFont, sans-serif";
+
+    if (typeof window.Chart !== 'undefined') {
+        const ctx1 = document.getElementById('mainTrendChart').getContext('2d');
+        const datasets1 = [];
+
+        if (state.trendsSeries.revenue) {
+            datasets1.push({
+                type: 'bar',
+                label: t('seriesRev'),
+                data: revSeries,
+                backgroundColor: 'rgba(37, 99, 235, 0.85)',
+                borderColor: '#1d4ed8',
+                borderWidth: 1,
+                borderRadius: 5,
+                yAxisID: 'yRial',
+                order: 2
+            });
+        }
+        if (state.trendsSeries.grossProfit) {
+            datasets1.push({
+                type: 'bar',
+                label: t('seriesGross'),
+                data: grossSeries,
+                backgroundColor: 'rgba(99, 102, 241, 0.82)',
+                borderColor: '#4f46e5',
+                borderWidth: 1,
+                borderRadius: 5,
+                yAxisID: 'yRial',
+                order: 2
+            });
+        }
+        if (state.trendsSeries.operatingProfit) {
+            datasets1.push({
+                type: 'bar',
+                label: t('seriesOp'),
+                data: opSeries,
+                backgroundColor: 'rgba(14, 165, 233, 0.82)',
+                borderColor: '#0284c7',
+                borderWidth: 1,
+                borderRadius: 5,
+                yAxisID: 'yRial',
+                order: 2
+            });
+        }
+        if (state.trendsSeries.netIncome) {
+            datasets1.push({
+                type: 'bar',
+                label: t('seriesNet'),
+                data: netSeries,
+                backgroundColor: 'rgba(13, 148, 136, 0.88)',
+                borderColor: '#0f766e',
+                borderWidth: 1,
+                borderRadius: 5,
+                yAxisID: 'yRial',
+                order: 2
+            });
+        }
+        if (state.trendsSeries.netMargin) {
+            datasets1.push({
+                type: 'line',
+                label: t('seriesNetMargin'),
+                data: netMarginSeries,
+                borderColor: '#d97706',
+                backgroundColor: 'rgba(217, 119, 6, 0.15)',
+                borderWidth: 3,
+                pointRadius: 5,
+                pointHoverRadius: 7,
+                pointBackgroundColor: '#ffffff',
+                pointBorderColor: '#d97706',
+                pointBorderWidth: 2.5,
+                tension: 0.3,
+                yAxisID: 'yPct',
+                order: 1
+            });
+        }
+
+        mainTrendChartInstance = new Chart(ctx1, {
+            data: { labels, datasets: datasets1 },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { mode: 'index', intersect: false },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        rtl: isRtl,
+                        labels: {
+                            font: { family: chartFontFamily, size: 12, weight: '600' },
+                            boxWidth: 12,
+                            padding: 14
+                        }
+                    },
+                    tooltip: {
+                        rtl: isRtl,
+                        titleFont: { family: chartFontFamily, size: 13, weight: '700' },
+                        bodyFont: { family: chartFontFamily, size: 12.5 },
+                        callbacks: {
+                            label: function(ctx) {
+                                const val = ctx.parsed.y;
+                                if (val === null || val === undefined) return `${ctx.dataset.label}: —`;
+                                if (ctx.dataset.yAxisID === 'yPct') {
+                                    return `${ctx.dataset.label}: ${toDisplayDigits(val.toFixed(2))}%`;
+                                }
+                                return `${ctx.dataset.label}: ${formatAccountingNumber(val)} ${t('unitMillionRial')}`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: {
+                            font: { family: chartFontFamily, size: 12, weight: '600' },
+                            color: '#334155'
+                        }
+                    },
+                    yRial: {
+                        type: 'linear',
+                        position: 'right',
+                        grid: { color: '#f1f5f9' },
+                        ticks: {
+                            font: { family: chartFontFamily, size: 11.5, weight: '600' },
+                            color: '#475569',
+                            callback: (v) => formatCompactRial(v)
+                        }
+                    },
+                    yPct: {
+                        type: 'linear',
+                        position: 'left',
+                        grid: { drawOnChartArea: false },
+                        ticks: {
+                            font: { family: chartFontFamily, size: 11.5, weight: '600' },
+                            color: '#d97706',
+                            callback: (v) => toDisplayDigits(v + '%')
+                        }
+                    }
+                }
+            }
+        });
+
+        // Second Chart: Profit Margins Evolution
+        const ctx2 = document.getElementById('marginTrendChart').getContext('2d');
+        marginTrendChartInstance = new Chart(ctx2, {
+            type: 'line',
+            data: {
+                labels,
+                datasets: [
+                    {
+                        label: t('summaryRowGrossMargin'),
+                        data: grossMarginSeries,
+                        borderColor: '#4f46e5',
+                        backgroundColor: 'rgba(79, 70, 229, 0.08)',
+                        borderWidth: 2.5,
+                        pointRadius: 4.5,
+                        pointBackgroundColor: '#ffffff',
+                        pointBorderColor: '#4f46e5',
+                        pointBorderWidth: 2,
+                        tension: 0.32,
+                        fill: false
+                    },
+                    {
+                        label: t('summaryRowOpMargin'),
+                        data: opMarginSeries,
+                        borderColor: '#0284c7',
+                        backgroundColor: 'rgba(2, 132, 199, 0.08)',
+                        borderWidth: 2.5,
+                        pointRadius: 4.5,
+                        pointBackgroundColor: '#ffffff',
+                        pointBorderColor: '#0284c7',
+                        pointBorderWidth: 2,
+                        tension: 0.32,
+                        fill: false
+                    },
+                    {
+                        label: t('summaryRowNetMargin'),
+                        data: netMarginSeries,
+                        borderColor: '#0d9488',
+                        backgroundColor: 'rgba(13, 148, 136, 0.12)',
+                        borderWidth: 3,
+                        pointRadius: 5,
+                        pointBackgroundColor: '#ffffff',
+                        pointBorderColor: '#0d9488',
+                        pointBorderWidth: 2.5,
+                        tension: 0.32,
+                        fill: true
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { mode: 'index', intersect: false },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        rtl: isRtl,
+                        labels: {
+                            font: { family: chartFontFamily, size: 12, weight: '600' },
+                            boxWidth: 12,
+                            padding: 14
+                        }
+                    },
+                    tooltip: {
+                        rtl: isRtl,
+                        titleFont: { family: chartFontFamily, size: 13, weight: '700' },
+                        bodyFont: { family: chartFontFamily, size: 12.5 },
+                        callbacks: {
+                            label: function(ctx) {
+                                const v = ctx.parsed.y;
+                                if (v === null || v === undefined) return `${ctx.dataset.label}: —`;
+                                return `${ctx.dataset.label}: ${toDisplayDigits(v.toFixed(2))}%`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: {
+                            font: { family: chartFontFamily, size: 12, weight: '600' },
+                            color: '#334155'
+                        }
+                    },
+                    y: {
+                        position: 'right',
+                        grid: { color: '#f1f5f9' },
+                        ticks: {
+                            font: { family: chartFontFamily, size: 11.5, weight: '600' },
+                            color: '#475569',
+                            callback: (v) => toDisplayDigits(v + '%')
+                        }
+                    }
+                }
+            }
+        });
+    }
+}
+
+/* ============================================================================
+   Side-by-Side Comparison View (Merged Table & Split-Screen Modes)
+   ============================================================================ */
+function extractSymbolRatios(symbol, consolidated) {
+    const bsKey = `${symbol}_${consolidated}_Balance Sheet`;
+    const isKey = `${symbol}_${consolidated}_Income Statement`;
+    const bsData = state.statementCache[bsKey];
+    const isData = state.statementCache[isKey];
+
+    const cols = (bsData && bsData.columns && bsData.columns.length)
+        ? bsData.columns
+        : ((isData && isData.columns && isData.columns.length) ? isData.columns : []);
+
+    const latestY = cols[0] || null;
+    const bsRows = bsData ? bsData.rows : [];
+    const isRows = isData ? isData.rows : [];
+
+    const currAssetsRow = findRowByCandidates(bsRows, ['جمع دارایی های جاری'], ['جمع دارایی های جاری']);
+    const currLiabRow = findRowByCandidates(bsRows, ['جمع بدهی های جاری'], ['جمع بدهی های جاری']);
+    const totAssetsRow = findRowByCandidates(bsRows, ['جمع دارایی ها'], ['جمع دارایی ها']);
+    const totLiabRow = findRowByCandidates(bsRows, ['جمع بدهی ها'], ['جمع بدهی ها']);
+    const totEquityRow = findRowByCandidates(bsRows, ['جمع حقوق صاحبان سهام', 'جمع حقوق مالکانه'], ['جمع حقوق صاحبان سهام', 'جمع حقوق مالکانه']);
+    const netIncomeRow = findRowByCandidates(isRows, ['سود(زیان) خالص', 'سود(زیان) خالص عملیات در حال تداوم'], ['سود(زیان) خالص']);
+
+    function getVal(row, yr) {
+        if (!row || !yr || row[yr] === null || row[yr] === undefined) return null;
+        const n = Number(row[yr]);
+        return Number.isNaN(n) ? null : n;
+    }
+
+    const ca = getVal(currAssetsRow, latestY);
+    const cl = getVal(currLiabRow, latestY);
+    const ta = getVal(totAssetsRow, latestY);
+    const tl = getVal(totLiabRow, latestY);
+    let eq = getVal(totEquityRow, latestY);
+    if ((eq === null || eq === 0) && ta !== null && tl !== null) eq = ta - tl;
+    const ni = getVal(netIncomeRow, latestY);
+
+    return {
+        year: latestY,
+        currentRatio: (ca !== null && cl && cl !== 0) ? (ca / Math.abs(cl)) : null,
+        roe: (ni !== null && eq && eq !== 0) ? ((ni / Math.abs(eq)) * 100) : null,
+        de: (tl !== null && eq && eq !== 0) ? (Math.abs(tl) / Math.abs(eq)) : null,
+        roa: (ni !== null && ta && ta !== 0) ? ((ni / Math.abs(ta)) * 100) : null
+    };
+}
+
+function buildCompareRatioCardsHtml(symA, symB, consolidated) {
+    const rA = extractSymbolRatios(symA, consolidated);
+    const rB = extractSymbolRatios(symB, consolidated);
+
+    function renderCard(title, sub, valA, valB, suffix) {
+        const strA = valA !== null ? toDisplayDigits(valA.toFixed(2) + suffix) : '—';
+        const strB = valB !== null ? toDisplayDigits(valB.toFixed(2) + suffix) : '—';
+        const absA = valA !== null ? Math.max(0.05, Math.abs(valA)) : 0;
+        const absB = valB !== null ? Math.max(0.05, Math.abs(valB)) : 0;
+        const total = absA + absB || 1;
+        const pctA = Math.round((absA / total) * 100);
+        const pctB = 100 - pctA;
+
+        return `
+            <div class="ratio-card">
+                <div class="ratio-card-top">
+                    <span class="ratio-card-title">${title}</span>
+                    <span class="ratio-card-tag">${rA.year ? t('fiscalYearTag', toDisplayDigits(rA.year)) : ''}</span>
+                </div>
+                <div class="compare-ratio-row">
+                    <div class="compare-ratio-side">
+                        <span class="sym-lbl"><span class="sym-badge-a">A</span> ${symA}</span>
+                        <span class="sym-val" style="color:#1d4ed8;">${strA}</span>
+                    </div>
+                    <div class="compare-ratio-side" style="text-align:left;">
+                        <span class="sym-lbl"><span class="sym-badge-b">B</span> ${symB}</span>
+                        <span class="sym-val" style="color:#0f766e;">${strB}</span>
+                    </div>
+                </div>
+                <div class="compare-bar-track">
+                    <div class="compare-bar-fill-a" style="width:${pctA}%"></div>
+                    <div class="compare-bar-fill-b" style="width:${pctB}%"></div>
+                </div>
+                <div class="ratio-card-foot">
+                    <span>${sub}</span>
+                </div>
+            </div>
+        `;
+    }
+
+    return `
+        <div class="ratios-summary-row">
+            ${renderCard(t('cardCurrentRatio'), t('cardCurrentRatioSub'), rA.currentRatio, rB.currentRatio, 'x')}
+            ${renderCard(t('cardROE'), t('cardROESub'), rA.roe, rB.roe, '%')}
+            ${renderCard(t('cardDE'), t('cardDESub'), rA.de, rB.de, 'x')}
+            ${renderCard(t('cardROA'), t('cardROASub'), rA.roa, rB.roa, '%')}
+        </div>
+    `;
+}
+
+function renderComparisonView(dataA, dataB) {
+    destroyTrendCharts();
+    state.lastCompareData = { dataA, dataB };
+
+    const symA = dataA.symbol || state.compareSymbolA;
+    const symB = dataB.symbol || state.compareSymbolB;
+    const nameA = dataA.company_name || symA;
+    const nameB = dataB.company_name || symB;
+
+    const colsA = dataA.columns || [];
+    const colsB = dataB.columns || [];
+    const rowsA = dataA.rows || [];
+    const rowsB = dataB.rows || [];
+
+    // Collect union of fiscal years sorted descending
+    const yearSet = new Set([...colsA, ...colsB]);
+    const allYearsDesc = Array.from(yearSet).sort((a, b) => Number(b) - Number(a));
+    const sliceYears = state.compareYearsCount === 0
+        ? allYearsDesc
+        : allYearsDesc.slice(0, state.compareYearsCount);
+
+    const q = (state.rowFilter || '').trim().toLowerCase();
+
+    // Build lookup map for rowsB by normalized Item name
+    const mapB = new Map();
+    rowsB.forEach(r => {
+        mapB.set(normalizeFa(r.Item), r);
+    });
+
+    // Combine standard rows from A (and any extra from B)
+    const combinedItems = [];
+    const seenNorm = new Set();
+    rowsA.forEach(r => {
+        const nk = normalizeFa(r.Item);
+        seenNorm.add(nk);
+        combinedItems.push({
+            Item: r.Item,
+            isSection: r.isSection,
+            isTotal: r.isTotal,
+            rowA: r,
+            rowB: mapB.get(nk) || null
+        });
+    });
+    rowsB.forEach(r => {
+        const nk = normalizeFa(r.Item);
+        if (!seenNorm.has(nk)) {
+            seenNorm.add(nk);
+            combinedItems.push({
+                Item: r.Item,
+                isSection: r.isSection,
+                isTotal: r.isTotal,
+                rowA: null,
+                rowB: r
+            });
+        }
+    });
+
+    const filteredItems = !q
+        ? combinedItems
+        : combinedItems.filter(it => {
+            if (it.isSection) return true;
+            const raw = String(it.Item || '').toLowerCase();
+            const trans = String(translateLineItem(it.Item) || '').toLowerCase();
+            return raw.includes(q) || trans.includes(q);
+        });
+
+    const compareRatioCardsHtml = buildCompareRatioCardsHtml(symA, symB, state.consolidated);
+
+    // Build body HTML depending on layout ('merged' vs 'split')
+    let bodyContentHtml = '';
+
+    if (state.compareLayout === 'merged') {
+        let theadRow1 = `<tr><th rowspan="2">${t('colLineItem')}</th>`;
+        let theadRow2 = '<tr>';
+
+        sliceYears.forEach((yr, idx) => {
+            const showDiff = idx === 0; // Show Diff % column on the latest fiscal year
+            const span = showDiff ? 3 : 2;
+            theadRow1 += `<th colspan="${span}">${t('colFiscalYear', toDisplayDigits(yr))}</th>`;
+            theadRow2 += `<th class="col-sym-a"><span class="sym-badge-a">A</span> ${symA}</th>`;
+            theadRow2 += `<th class="col-sym-b"><span class="sym-badge-b">B</span> ${symB}</th>`;
+            if (showDiff) {
+                theadRow2 += `<th class="col-sym-diff">${t('compareDiffHeader')}</th>`;
+            }
+        });
+        theadRow1 += '</tr>';
+        theadRow2 += '</tr>';
+
+        let tbody = '<tbody>';
+        filteredItems.forEach((it, rIdx) => {
+            const label = translateLineItem(it.Item || '—');
+            if (it.isSection) {
+                const totalCols = sliceYears.reduce((acc, _, idx) => acc + (idx === 0 ? 3 : 2), 0);
+                tbody += `<tr class="row-section" data-ridx="${rIdx}"><td>${label}</td>`;
+                for (let c = 0; c < totalCols; c++) tbody += '<td></td>';
+                tbody += '</tr>';
+                return;
+            }
+
+            const trClass = it.isTotal ? 'row-total' : '';
+            tbody += `<tr class="${trClass}" data-ridx="${rIdx}"><td>${label}</td>`;
+
+            sliceYears.forEach((yr, idx) => {
+                const showDiff = idx === 0;
+                const rawA = it.rowA ? it.rowA[yr] : null;
+                const rawB = it.rowB ? it.rowB[yr] : null;
+                const fmtA = formatAccountingNumber(rawA);
+                const fmtB = formatAccountingNumber(rawB);
+
+                if (fmtA === null) {
+                    tbody += '<td class="num empty cell-sym-a">—</td>';
+                } else {
+                    const negA = Number(rawA) < 0;
+                    tbody += `<td class="num cell-sym-a ${negA ? 'negative' : ''}">${fmtA}</td>`;
+                }
+
+                if (fmtB === null) {
+                    tbody += '<td class="num empty cell-sym-b">—</td>';
+                } else {
+                    const negB = Number(rawB) < 0;
+                    tbody += `<td class="num cell-sym-b ${negB ? 'negative' : ''}">${fmtB}</td>`;
+                }
+
+                if (showDiff) {
+                    const numA = rawA !== null && rawA !== undefined ? Number(rawA) : null;
+                    const numB = rawB !== null && rawB !== undefined ? Number(rawB) : null;
+                    if (numA !== null && numB !== null && numB !== 0 && !Number.isNaN(numA) && !Number.isNaN(numB)) {
+                        const diffPct = ((numA - numB) / Math.abs(numB)) * 100;
+                        const sign = diffPct > 0 ? '+' : '';
+                        const cls = diffPct >= 0 ? 'growth-pos' : 'growth-neg';
+                        tbody += `<td class="num cell-sym-diff"><span class="${cls}">${toDisplayDigits(`${sign}${diffPct.toFixed(1)}%`)}</span></td>`;
+                    } else {
+                        tbody += '<td class="num empty cell-sym-diff">—</td>';
+                    }
+                }
+            });
+
+            tbody += '</tr>';
+        });
+        tbody += '</tbody>';
+
+        bodyContentHtml = `
+            <div class="table-card">
+                <div class="table-scroll">
+                    <table class="fin-table merged-compare-table">
+                        <thead>${theadRow1}${theadRow2}</thead>
+                        ${tbody}
+                    </table>
+                </div>
+            </div>
+        `;
+    } else {
+        // Split-Screen View (Two Side-by-Side Panes with Synchronized Scroll & Row Hover)
+        function buildSinglePaneTable(cols, items, sideKey) {
+            let th = `<thead><tr><th>${t('colLineItem')}</th>`;
+            cols.forEach(c => {
+                th += `<th>${t('colFiscalYear', toDisplayDigits(c))}</th>`;
+            });
+            th += '</tr></thead>';
+
+            let tb = '<tbody>';
+            items.forEach((it, rIdx) => {
+                const label = translateLineItem(it.Item || '—');
+                const rowObj = sideKey === 'A' ? it.rowA : it.rowB;
+                if (it.isSection) {
+                    tb += `<tr class="row-section" data-ridx="${rIdx}"><td>${label}</td>`;
+                    cols.forEach(() => { tb += '<td></td>'; });
+                    tb += '</tr>';
+                    return;
+                }
+                const trClass = it.isTotal ? 'row-total' : '';
+                tb += `<tr class="${trClass}" data-ridx="${rIdx}"><td>${label}</td>`;
+                cols.forEach(c => {
+                    const raw = rowObj ? rowObj[c] : null;
+                    const fmt = formatAccountingNumber(raw);
+                    if (fmt === null) {
+                        tb += '<td class="num empty">—</td>';
+                    } else {
+                        const isNeg = Number(raw) < 0;
+                        tb += `<td class="num ${isNeg ? 'negative' : ''}">${fmt}</td>`;
+                    }
+                });
+                tb += '</tr>';
+            });
+            tb += '</tbody>';
+            return `<table class="fin-table">${th}${tb}</table>`;
+        }
+
+        const paneColsA = colsA.length ? colsA : sliceYears;
+        const paneColsB = colsB.length ? colsB : sliceYears;
+
+        bodyContentHtml = `
+            <div class="compare-split-grid">
+                <div class="compare-split-pane">
+                    <div class="compare-pane-banner pane-a">
+                        <span><span class="sym-badge-a">A</span> ${t('comparePaneTitleA', nameA, symA)}</span>
+                        <span class="text-muted small">${toDisplayDigits(paneColsA.length)} ${state.lang === 'en' ? 'Years' : 'سال مالی'}</span>
+                    </div>
+                    <div class="table-card">
+                        <div class="table-scroll" id="splitScrollPaneA">
+                            ${buildSinglePaneTable(paneColsA, filteredItems, 'A')}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="compare-split-pane">
+                    <div class="compare-pane-banner pane-b">
+                        <span><span class="sym-badge-b">B</span> ${t('comparePaneTitleB', nameB, symB)}</span>
+                        <span class="text-muted small">${toDisplayDigits(paneColsB.length)} ${state.lang === 'en' ? 'Years' : 'سال مالی'}</span>
+                    </div>
+                    <div class="table-card">
+                        <div class="table-scroll" id="splitScrollPaneB">
+                            ${buildSinglePaneTable(paneColsB, filteredItems, 'B')}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    $('#contentArea').innerHTML = `
+        <div class="compare-container">
+            <!-- Comparison Controls Bar -->
+            <div class="compare-header-bar">
+                <div class="compare-selectors-group">
+                    <div class="compare-sym-box ${state.compareActiveTarget === 'A' ? 'active-target' : ''}" id="boxSymA" title="${t('compareChipHint', 'A')}">
+                        <span class="sym-badge-a">A</span>
+                        <span class="small fw-bold">${t('compareSymbolALabel')}</span>
+                        <input type="text" class="compare-sym-input" id="compareInputA" list="symbolDatalist" value="${symA}">
+                    </div>
+
+                    <button type="button" class="compare-swap-btn" id="compareSwapBtn" title="${t('compareSwapTitle')}">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4"/></svg>
+                    </button>
+
+                    <div class="compare-sym-box ${state.compareActiveTarget === 'B' ? 'active-target' : ''}" id="boxSymB" title="${t('compareChipHint', 'B')}">
+                        <span class="sym-badge-b">B</span>
+                        <span class="small fw-bold">${t('compareSymbolBLabel')}</span>
+                        <input type="text" class="compare-sym-input" id="compareInputB" list="symbolDatalist" value="${symB}">
+                    </div>
+
+                    <button type="button" class="tv-tool-btn primary" id="compareRunBtn">${t('compareRunBtn')}</button>
+                </div>
+
+                <div class="compare-selectors-group">
+                    <!-- Statement Type Switcher -->
+                    <div class="mode-switch" id="compareStmtSwitch">
+                        <button type="button" class="mode-btn ${state.compareBaseStatement === 'Balance Sheet' ? 'active' : ''}" data-cstmt="Balance Sheet">${t('compareStmtBS')}</button>
+                        <button type="button" class="mode-btn ${state.compareBaseStatement === 'Income Statement' ? 'active' : ''}" data-cstmt="Income Statement">${t('compareStmtIS')}</button>
+                        <button type="button" class="mode-btn ${state.compareBaseStatement === 'Cash Flow' ? 'active' : ''}" data-cstmt="Cash Flow">${t('compareStmtCF')}</button>
+                        <button type="button" class="mode-btn ${state.compareBaseStatement === 'Comprehensive Income' ? 'active' : ''}" data-cstmt="Comprehensive Income">${t('compareStmtCI')}</button>
+                    </div>
+
+                    <!-- Display Layout Switcher (Merged vs Split-Screen) -->
+                    <div class="mode-switch" id="compareLayoutSwitch">
+                        <button type="button" class="mode-btn ${state.compareLayout === 'merged' ? 'active' : ''}" data-clayout="merged">${t('compareModeMerged')}</button>
+                        <button type="button" class="mode-btn ${state.compareLayout === 'split' ? 'active' : ''}" data-clayout="split">${t('compareModeSplit')}</button>
+                    </div>
+
+                    ${state.compareLayout === 'merged' ? `
+                        <div class="mode-switch" id="compareYearsSwitch">
+                            <button type="button" class="mode-btn ${state.compareYearsCount === 3 ? 'active' : ''}" data-cyrs="3">${t('compareYears3')}</button>
+                            <button type="button" class="mode-btn ${state.compareYearsCount === 5 ? 'active' : ''}" data-cyrs="5">${t('compareYears5')}</button>
+                            <button type="button" class="mode-btn ${state.compareYearsCount === 0 ? 'active' : ''}" data-cyrs="0">${t('compareYearsAll')}</button>
+                        </div>
+                    ` : `
+                        <button type="button" class="metric-toggle-btn ${state.compareSyncScroll ? 'active' : ''}" id="toggleSyncScrollBtn">
+                            <span class="swatch" style="background:#2563eb;"></span>
+                            <span>${t('compareSyncScrollLabel')}</span>
+                        </button>
+                    `}
+                </div>
+            </div>
+
+            <!-- Head-to-Head Key Financial Ratios Strip -->
+            ${compareRatioCardsHtml}
+
+            <!-- Merged or Split-Screen Financial Statements -->
+            ${bodyContentHtml}
+        </div>
+    `;
+
+    // Wire Compare View interactive controls
+    $('#compareInputA').addEventListener('focus', () => {
+        state.compareActiveTarget = 'A';
+        $('#boxSymA').classList.add('active-target');
+        $('#boxSymB').classList.remove('active-target');
+    });
+    $('#compareInputB').addEventListener('focus', () => {
+        state.compareActiveTarget = 'B';
+        $('#boxSymB').classList.add('active-target');
+        $('#boxSymA').classList.remove('active-target');
+    });
+
+    const triggerCompareLoad = () => {
+        const newA = $('#compareInputA').value.trim() || state.compareSymbolA;
+        const newB = $('#compareInputB').value.trim() || state.compareSymbolB;
+        loadComparison(newA, newB, state.compareBaseStatement, state.consolidated);
+    };
+
+    $('#compareRunBtn').addEventListener('click', triggerCompareLoad);
+    $('#compareInputA').addEventListener('keydown', (e) => { if (e.key === 'Enter') triggerCompareLoad(); });
+    $('#compareInputB').addEventListener('keydown', (e) => { if (e.key === 'Enter') triggerCompareLoad(); });
+
+    $('#compareSwapBtn').addEventListener('click', () => {
+        const tmp = state.compareSymbolA;
+        state.compareSymbolA = state.compareSymbolB;
+        state.compareSymbolB = tmp;
+        loadComparison(state.compareSymbolA, state.compareSymbolB, state.compareBaseStatement, state.consolidated);
+    });
+
+    document.querySelectorAll('#compareStmtSwitch .mode-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            state.compareBaseStatement = btn.dataset.cstmt;
+            loadComparison(state.compareSymbolA, state.compareSymbolB, state.compareBaseStatement, state.consolidated);
+        });
+    });
+
+    document.querySelectorAll('#compareLayoutSwitch .mode-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            state.compareLayout = btn.dataset.clayout;
+            renderComparisonView(dataA, dataB);
+        });
+    });
+
+    document.querySelectorAll('#compareYearsSwitch .mode-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            state.compareYearsCount = Number(btn.dataset.cyrs || 3);
+            renderComparisonView(dataA, dataB);
+        });
+    });
+
+    const syncBtnEl = $('#toggleSyncScrollBtn');
+    if (syncBtnEl) {
+        syncBtnEl.addEventListener('click', () => {
+            state.compareSyncScroll = !state.compareSyncScroll;
+            renderComparisonView(dataA, dataB);
+        });
+    }
+
+    // Wire synchronized scrolling and row hover in Split-Screen mode
+    const paneA = $('#splitScrollPaneA');
+    const paneB = $('#splitScrollPaneB');
+    if (paneA && paneB) {
+        let isSyncingLeft = false;
+        let isSyncingRight = false;
+        paneA.addEventListener('scroll', () => {
+            if (!state.compareSyncScroll) return;
+            if (!isSyncingLeft) {
+                isSyncingRight = true;
+                paneB.scrollTop = paneA.scrollTop;
+            }
+            isSyncingLeft = false;
+        });
+        paneB.addEventListener('scroll', () => {
+            if (!state.compareSyncScroll) return;
+            if (!isSyncingRight) {
+                isSyncingLeft = true;
+                paneA.scrollTop = paneB.scrollTop;
+            }
+            isSyncingRight = false;
+        });
+
+        // Synchronized Row Hover Highlighting across both panes
+        document.querySelectorAll('.compare-split-grid tr[data-ridx]').forEach(tr => {
+            tr.addEventListener('mouseenter', () => {
+                const idx = tr.dataset.ridx;
+                document.querySelectorAll(`.compare-split-grid tr[data-ridx="${idx}"]`).forEach(m => m.classList.add('sync-hover-row'));
+            });
+            tr.addEventListener('mouseleave', () => {
+                const idx = tr.dataset.ridx;
+                document.querySelectorAll(`.compare-split-grid tr[data-ridx="${idx}"]`).forEach(m => m.classList.remove('sync-hover-row'));
+            });
+        });
+    }
+}
+
+async function loadComparison(symA, symB, baseStatement = state.compareBaseStatement, consolidated = state.consolidated) {
+    const cleanA = (symA || state.currentSymbol || 'شپنا').trim();
+    let cleanB = (symB || state.compareSymbolB || 'فملی').trim();
+    if (cleanB === cleanA) {
+        const alt = state.companies.find(c => c.symbol !== cleanA);
+        if (alt && !symB) cleanB = alt.symbol;
+    }
+
+    state.compareSymbolA = cleanA;
+    state.compareSymbolB = cleanB;
+    state.compareBaseStatement = baseStatement;
+    state.currentStatement = 'Compare';
+    state.consolidated = consolidated;
+    renderFirmStrip();
+
+    const filterEl = $('#rowFilterInput');
+    if (filterEl) filterEl.style.display = 'block';
+
+    setBusy(true, t('loadingCompare', cleanA, cleanB));
+
+    try {
+        // Fetch primary statement + Balance Sheet & Income Statement for both Symbol A and Symbol B in parallel
+        const stmtsNeeded = Array.from(new Set([baseStatement, 'Balance Sheet', 'Income Statement']));
+        const fetchTasks = [];
+        for (const st of stmtsNeeded) {
+            fetchTasks.push(fetchStatementData(cleanA, st, consolidated).catch(() => ({ ok: false, data: null })));
+            fetchTasks.push(fetchStatementData(cleanB, st, consolidated).catch(() => ({ ok: false, data: null })));
+        }
+        await Promise.all(fetchTasks);
+
+        const dataA = state.statementCache[`${cleanA}_${consolidated}_${baseStatement}`] || { symbol: cleanA, columns: [], rows: [] };
+        const dataB = state.statementCache[`${cleanB}_${consolidated}_${baseStatement}`] || { symbol: cleanB, columns: [], rows: [] };
+
+        renderComparisonView(dataA, dataB);
+
+        const modeLabel = consolidated ? t('consolidated') : t('standalone');
+        $('#statsRow').innerHTML = `
+            <span class="meta-inline-item"><span class="sym-badge-a">A</span> <strong>${dataA.company_name || cleanA}</strong></span>
+            <span class="meta-sep">vs</span>
+            <span class="meta-inline-item"><span class="sym-badge-b">B</span> <strong>${dataB.company_name || cleanB}</strong> · ${modeLabel}</span>
+        `;
+        await refreshCompanies();
+    } catch (e) {
+        $('#contentArea').innerHTML = `<div class="empty-state text-danger"><h5>Error</h5><p>${e.message}</p></div>`;
+    } finally {
+        state.busy = false;
+        $('#loadBtn').disabled = false;
+        $('#syncBtn').disabled = false;
+    }
+}
+
+async function fetchStatementData(symbol, statement, consolidated) {
+    const cacheKey = `${symbol}_${consolidated}_${statement}`;
+    const url = `/api/financials?symbol=${encodeURIComponent(symbol)}&statement=${encodeURIComponent(statement)}&consolidated=${consolidated}`;
+    const res = await fetch(url);
+    const data = await res.json();
+    if (res.ok && data && Array.isArray(data.columns) && data.columns.length > 0) {
+        state.statementCache[cacheKey] = data;
+    }
+    return { ok: res.ok, data };
+}
+
+function updateStatsRow(data, symbol, consolidated) {
+    if (!data || !data.columns || !data.columns.length) {
+        $('#statsRow').innerHTML = '';
+        return;
+    }
+    const modeLabel = consolidated ? t('consolidated') : t('standalone');
+    const tblName = data.table || 'balance_sheet';
+    $('#statsRow').innerHTML = `
+        <span class="meta-inline-item"><span class="dot"></span><strong>${data.company_name || symbol} (${symbol})</strong> · ${modeLabel}</span>
+        <span class="meta-sep">·</span>
+        <span class="meta-inline-item">${t('fiscalYearsSpan', toDisplayDigits(data.columns.length), toDisplayDigits(data.columns[data.columns.length - 1]), toDisplayDigits(data.columns[0]))}</span>
+        <span class="meta-sep">·</span>
+        <span class="meta-inline-item" style="direction:ltr;font-family:var(--tv-font-ui);font-size:11.5px;color:#64748b;">fundamental.db :: ${tblName}</span>
+    `;
+}
+
+async function loadStatement(symbol, statement, consolidated = state.consolidated) {
+    if (!symbol) return;
+
+    if (statement === 'Compare') {
+        state.compareSymbolA = symbol;
+        if (!state.compareSymbolB || state.compareSymbolB === symbol) {
+            const secondFirm = state.companies.find(c => c.symbol !== symbol);
+            state.compareSymbolB = secondFirm ? secondFirm.symbol : 'فملی';
+        }
+        await loadComparison(state.compareSymbolA, state.compareSymbolB, state.compareBaseStatement, consolidated);
+        return;
+    }
+
+    // Keep compareBaseStatement synced with the last standard statement viewed
+    if (['Balance Sheet', 'Income Statement', 'Cash Flow', 'Comprehensive Income'].includes(statement)) {
+        state.compareBaseStatement = statement;
+    }
+
+    state.currentSymbol = symbol;
+    state.currentStatement = statement;
+    state.consolidated = consolidated;
+    renderFirmStrip();
+
+    const isTrends = statement === 'Trends';
+    const targetBackendStmt = isTrends ? 'Income Statement' : statement;
+    const modeLabel = consolidated ? t('consolidated') : t('standalone');
+
+    const filterEl = $('#rowFilterInput');
+    if (filterEl) filterEl.style.display = isTrends ? 'none' : 'block';
+
+    setBusy(true, isTrends ? t('loadingTrends', symbol) : t('loadingStmt', symbol, modeLabel));
+
+    try {
+        // Fetch primary requested statement + ensure Balance Sheet & Income Statement are cached for Ratio Summary Cards
+        const primaryPromise = fetchStatementData(symbol, targetBackendStmt, consolidated);
+        const bsKey = `${symbol}_${consolidated}_Balance Sheet`;
+        const isKey = `${symbol}_${consolidated}_Income Statement`;
+
+        const auxPromises = [];
+        if (targetBackendStmt !== 'Balance Sheet' && !state.statementCache[bsKey]) {
+            auxPromises.push(fetchStatementData(symbol, 'Balance Sheet', consolidated).catch(() => null));
+        }
+        if (targetBackendStmt !== 'Income Statement' && !state.statementCache[isKey]) {
+            auxPromises.push(fetchStatementData(symbol, 'Income Statement', consolidated).catch(() => null));
+        }
+
+        const [{ ok, data }] = await Promise.all([primaryPromise, ...auxPromises]);
+
+        if (!ok || !data || !data.columns || data.columns.length === 0) {
+            if (isTrends) {
+                renderTrendsView({ symbol, columns: [], rows: [] });
+            } else {
+                renderTable({ symbol, columns: [], rows: [] });
+            }
+            return;
+        }
+
+        if (isTrends) {
+            renderTrendsView(data);
+        } else {
+            renderTable(data);
+        }
+
+        updateStatsRow(data, symbol, consolidated);
+        await refreshCompanies();
+    } catch (e) {
+        $('#contentArea').innerHTML = `<div class="empty-state text-danger"><h5>Error</h5><p>${e.message}</p></div>`;
+    } finally {
+        state.busy = false;
+        $('#loadBtn').disabled = false;
+        $('#syncBtn').disabled = false;
+    }
+}
+
+async function syncFromCodal(symbol) {
+    if (!symbol) return;
+    setBusy(true, t('loadingSync', symbol));
+
+    try {
+        await fetch('/api/financials/update', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                symbol,
+                consolidated: Boolean(state.consolidated),
+                sync: true
+            })
+        });
+        // Clear cached statements for this symbol so fresh data is loaded
+        Object.keys(state.statementCache).forEach(k => {
+            if (k.startsWith(`${symbol}_`)) delete state.statementCache[k];
+        });
+        await refreshCompanies();
+        await loadStatement(symbol, state.currentStatement, state.consolidated);
+    } catch (e) {
+        $('#contentArea').innerHTML = `<div class="empty-state text-danger"><h5>Error</h5><p>${e.message}</p></div>`;
+        state.busy = false;
+        $('#loadBtn').disabled = false;
+        $('#syncBtn').disabled = false;
+    }
+}
+
+// Wire Statement, Trends & Compare Tabs
+document.querySelectorAll('.tab-item').forEach(btn => {
+    btn.addEventListener('click', () => {
+        if (state.busy) return;
+        document.querySelectorAll('.tab-item').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const sym = $('#symbolInput').value.trim() || state.currentSymbol;
+        loadStatement(sym, btn.dataset.stmt, state.consolidated);
+    });
+});
+
+// Wire Standalone / Consolidated Switch
+document.querySelectorAll('#modeSwitch .mode-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        if (state.busy) return;
+        document.querySelectorAll('#modeSwitch .mode-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const cons = Number(btn.dataset.cons || 0);
+        const sym = $('#symbolInput').value.trim() || state.currentSymbol;
+        loadStatement(sym, state.currentStatement, cons);
+    });
+});
+
+// Wire Entire Page Language Toggle (Persian <-> English)
+$('#digitLangBtn').addEventListener('click', () => {
+    state.lang = state.lang === 'fa' ? 'en' : 'fa';
+    localStorage.setItem('fund_page_lang', state.lang);
+    applyLanguageSettings();
+    renderFirmStrip();
+    if (state.currentStatement === 'Compare' && state.lastCompareData) {
+        renderComparisonView(state.lastCompareData.dataA, state.lastCompareData.dataB);
+    } else if (state.lastData) {
+        updateStatsRow(state.lastData, state.currentSymbol, state.consolidated);
+        if (state.currentStatement === 'Trends') {
+            renderTrendsView(state.lastData);
+        } else {
+            renderTable(state.lastData);
+        }
+    }
+});
+
+// Wire Filter Input
+$('#rowFilterInput').addEventListener('input', (e) => {
+    state.rowFilter = e.target.value;
+    if (state.currentStatement === 'Compare' && state.lastCompareData) {
+        renderComparisonView(state.lastCompareData.dataA, state.lastCompareData.dataB);
+    } else if (state.lastData && state.currentStatement !== 'Trends') {
+        renderTable(state.lastData);
+    }
+});
+
+$('#loadBtn').addEventListener('click', () => {
+    const sym = $('#symbolInput').value.trim();
+    if (sym) loadStatement(sym, state.currentStatement, state.consolidated);
+});
+
+$('#syncBtn').addEventListener('click', () => {
+    const sym = $('#symbolInput').value.trim() || state.currentSymbol;
+    if (sym) syncFromCodal(sym);
+});
+
+$('#exportExcelBtn').addEventListener('click', () => {
+    const sym = $('#symbolInput').value.trim() || state.currentSymbol;
+    if (!sym) return;
+    window.location.href = `/api/financials/export?symbol=${encodeURIComponent(sym)}&consolidated=${state.consolidated}`;
+});
+
+$('#symbolInput').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        const sym = $('#symbolInput').value.trim();
+        if (sym) loadStatement(sym, state.currentStatement, state.consolidated);
+    }
+});
+
+(async function boot() {
+    applyLanguageSettings();
+    await refreshCompanies();
+    const urlParams = new URLSearchParams(window.location.search);
+    const initSym = urlParams.get('symbol') || (state.companies[0] ? state.companies[0].symbol : 'شپنا');
+    const viewParam = urlParams.get('view');
+    const initView = viewParam === 'trends' ? 'Trends' : (viewParam === 'compare' ? 'Compare' : state.currentStatement);
+    if (initView !== 'Balance Sheet') {
+        document.querySelectorAll('.tab-item').forEach(b => {
+            b.classList.toggle('active', b.dataset.stmt === initView);
+        });
+    }
+    $('#symbolInput').value = initSym;
+    await loadStatement(initSym, initView, state.consolidated);
+})();
+</script>
+</body>
+</html>

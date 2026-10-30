@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Analysis — Stock Platform</title>
+
+    <link rel="icon" href="data:,">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --tv-bg-2:   #f8f9fb;
+            --tv-border: #e0e3eb;
+            --tv-text:   #131722;
+            --tv-muted:  #787b86;
+            --tv-font:   'Inter', -apple-system, sans-serif;
+        }
+        body { background: var(--tv-bg-2); font-family: var(--tv-font); color: var(--tv-text); }
+        .card { border: 1px solid var(--tv-border); border-radius: 10px; }
+        .metric-label { font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; color: var(--tv-muted); font-weight: 600; }
+        .metric-value { font-size: 1.5rem; font-weight: 700; }
+    </style>
+</head>
+<body class="py-4">
+
+<div class="container">
+
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+            <h3 class="fw-bold mb-0">AI Analysis</h3>
+            <small class="text-muted">Automated insights &amp; signal generation</small>
+        </div>
+        <a href="/" class="btn btn-outline-secondary btn-sm">← Back to Charts</a>
+    </div>
+
+    <!-- Asset selection -->
+    <div class="card shadow-sm p-3 mb-4">
+        <div class="row g-3 align-items-end">
+            <div class="col-md-6">
+                <label class="form-label fw-semibold" for="assetSelect">Asset</label>
+                <select id="assetSelect" class="form-select">
+                    {% for asset in assets %}
+                        <option value="{{ asset.value }}">{{ asset.label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-6">
+                <button id="analyzeBtn" type="button" class="btn btn-primary w-100 fw-semibold">
+                    Load Snapshot
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="alert alert-warning" role="alert">
+        <strong>Heads-up:</strong>
+        the AI model backend is not connected yet. This page renders the selected
+        asset's latest market snapshot straight from the database — plug an
+        inference endpoint in here to enable generated insights.
+    </div>
+
+    <!-- Snapshot (populated by JS) -->
+    <div id="snapshot" class="row g-3 d-none">
+        <div class="col-md-3">
+            <div class="card p-3 shadow-sm">
+                <div class="metric-label">Last Close</div>
+                <div class="metric-value" id="mClose">—</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card p-3 shadow-sm">
+                <div class="metric-label">Change (last bar)</div>
+                <div class="metric-value" id="mChange">—</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card p-3 shadow-sm">
+                <div class="metric-label">Period High</div>
+                <div class="metric-value" id="mHigh">—</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card p-3 shadow-sm">
+                <div class="metric-label">Period Low</div>
+                <div class="metric-value" id="mLow">—</div>
+            </div>
+        </div>
+        <div class="col-12">
+            <div class="card p-3 shadow-sm">
+                <div class="metric-label mb-2">Data Coverage</div>
+                <div id="mRange" class="text-muted">—</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="status" class="text-muted mt-3"></div>
+
+</div>
+<script>
+(function () {
+    'use strict';
+
+    const sel      = document.getElementById('assetSelect');
+    const btn      = document.getElementById('analyzeBtn');
+    const statusEl = document.getElementById('status');
+
+    function fmt(n) {
+        if (n === null || n === undefined || isNaN(n)) return '—';
+        return Number(n).toLocaleString(undefined, { maximumFractionDigits: 4 });
+    }
+
+    async function loadSnapshot() {
+        const asset = sel ? sel.value : null;
+        if (!asset) return;
+
+        btn.disabled = true;
+        statusEl.textContent = 'Loading snapshot…';
+
+        try {
+            const res = await fetch('/data/' + encodeURIComponent(asset) + '/1d?limit=10000');
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+
+            const data = await res.json();
+            const bars = (data && data.chart_data) || [];
+
+            if (!bars.length) {
+                document.getElementById('snapshot').classList.add('d-none');
+                statusEl.textContent = 'No stored data for this asset yet.';
+                return;
+            }
+
+            const last = bars[bars.length - 1];
+            const prev = bars.length > 1 ? bars[bars.length - 2] : last;
+
+            let hi = -Infinity, lo = Infinity;
+            bars.forEach(function (b) {
+                if (b.high > hi) hi = b.high;
+                if (b.low  < lo) lo = b.low;
+            });
+
+            document.getElementById('mClose').textContent = fmt(last.close);
+
+            const chg = last.close - prev.close;
+            const pct = prev.close ? (chg / prev.close) * 100 : 0;
+            const changeEl = document.getElementById('mChange');
+            changeEl.textContent = (chg >= 0 ? '+' : '') + fmt(chg) + '  (' + pct.toFixed(2) + '%)';
+            changeEl.style.color = chg >= 0 ? '#28a745' : '#dc3545';
+
+            document.getElementById('mHigh').textContent = fmt(hi);
+            document.getElementById('mLow').textContent  = fmt(lo);
+            document.getElementById('mRange').textContent =
+                bars[0].timeStr + '  →  ' + last.timeStr + '   (' + bars.length + ' daily bars)';
+
+            document.getElementById('snapshot').classList.remove('d-none');
+            statusEl.textContent = '';
+        } catch (e) {
+            statusEl.textContent = 'Failed to load snapshot: ' + e.message;
+        } finally {
+            btn.disabled = false;
+        }
+    }
+
+    btn.addEventListener('click', loadSnapshot);
+    if (sel && sel.value) loadSnapshot();
+})();
+</script>
+
+</body>
+</html>

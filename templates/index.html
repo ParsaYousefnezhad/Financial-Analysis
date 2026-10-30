@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Platform — TradingView Lightweight Charts</title>
+
+    <link rel="icon" href="data:,">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <!-- TradingView Lightweight Charts Standalone Production Bundle (Primary CDN + Synchronous Fallbacks) -->
+    <script src="https://unpkg.com/lightweight-charts@4.2.1/dist/lightweight-charts.standalone.production.js"></script>
+    <script>
+        if (typeof window.LightweightCharts === 'undefined') {
+            document.write('<script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.2.1/dist/lightweight-charts.standalone.production.js"><\/script>');
+        }
+    </script>
+    <script>
+        if (typeof window.LightweightCharts === 'undefined') {
+            document.write('<script src="/static/lightweight-charts.standalone.production.js"><\/script>');
+        }
+    </script>
+
+    <link rel="stylesheet" href="/static/style.css?v=lw16">
+</head>
+
+<body>
+
+<div id="app">
+
+    <!-- ============================================================
+         TradingView-style toolbar
+         ============================================================ -->
+    <div class="tv-toolbar">
+        <!-- Symbol selector button -->
+        <button type="button" class="tv-symbol-btn" id="symbolBtn" title="Change symbol ( / )">
+            <span class="tv-symbol-avatar" id="symbolAvatar">?</span>
+            <span id="currentSymbol">—</span>
+            <svg class="tv-search-icon" viewBox="0 0 1024 1024">
+                <path d="M945.066667 898.133333l-189.866667-189.866666c55.466667-64 87.466667-149.333333 87.466667-241.066667 0-204.8-168.533333-373.333333-373.333334-373.333333S96 264.533333 96 469.333333 264.533333 842.666667 469.333333 842.666667c91.733333 0 174.933333-34.133333 241.066667-87.466667l189.866667 189.866667c6.4 6.4 14.933333 8.533333 23.466666 8.533333s17.066667-2.133333 23.466667-8.533333c8.533333-12.8 8.533333-34.133333-2.133333-46.933334zM469.333333 778.666667C298.666667 778.666667 160 640 160 469.333333S298.666667 160 469.333333 160 778.666667 298.666667 778.666667 469.333333 640 778.666667 469.333333 778.666667z"/>
+            </svg>
+        </button>
+
+        <!-- Timeframe list — matches TIMEFRAMES in config.py -->
+        <div class="tv-periods" id="periodBar">
+            <span class="tv-period" data-tf="1m">1m</span>
+            <span class="tv-period" data-tf="5m">5m</span>
+            <span class="tv-period" data-tf="10m">10m</span>
+            <span class="tv-period" data-tf="15m">15m</span>
+            <span class="tv-period" data-tf="30m">30m</span>
+            <span class="tv-period" data-tf="1h">1H</span>
+            <span class="tv-period" data-tf="4h">4H</span>
+            <span class="tv-period" data-tf="1d">1D</span>
+        </div>
+
+        <!-- Tools -->
+        <div class="tv-tools">
+            <button type="button" class="tv-tool-btn" id="openIndicatorsBtn" title="Indicators &amp; Strategies">
+                <svg viewBox="0 0 20 20"><path d="M15.873,20L3.65079,20C1.5873,20,0,18.3871,0,16.2903L0,3.70968C-3.78442e-7,1.6129,1.5873,0,3.65079,0L15.873,0C17.9365,0,19.5238,1.6129,19.5238,3.70968C19.5238,4.35484,19.2063,4.51613,18.5714,4.51613C17.9365,4.51613,17.619,4.19355,17.619,3.70968C17.619,2.74194,16.8254,1.93548,15.873,1.93548L3.65079,1.93548C2.69841,1.93548,1.90476,2.74194,1.90476,3.70968L1.90476,16.2903C1.90476,17.2581,2.69841,18.0645,3.65079,18.0645L15.873,18.0645C16.8254,18.0645,17.619,17.2581,17.619,16.2903C17.619,15.8065,18.0952,15.3226,18.5714,15.3226C19.0476,15.3226,19.5238,15.8065,19.5238,16.2903C19.5238,18.2258,17.9365,20,15.873,20ZM14.9206,12.9032C14.7619,12.9032,14.4444,12.9032,14.2857,12.7419L11.2698,9.35484C10.9524,9.03226,10.9524,8.54839,11.2698,8.22581C11.5873,7.90323,12.0635,7.90323,12.381,8.22581L15.3968,11.6129C15.7143,11.9355,15.7143,12.4194,15.3968,12.7419C15.3968,12.9032,15.2381,12.9032,14.9206,12.9032ZM11.4286,13.2258C11.2698,13.2258,11.1111,13.2258,10.9524,13.0645C10.6349,12.7419,10.6349,12.4194,10.9524,12.0968L15.0794,7.74193C15.3968,7.41935,15.7143,7.41935,16.0317,7.74193C16.3492,8.06452,16.3492,8.3871,16.0317,8.70968L11.9048,13.0645C11.746,13.2258,11.5873,13.2258,11.4286,13.2258ZM10.3175,3.70968C10.6349,3.70968,11.4286,3.87097,11.4286,4.67742C11.4286,5.32258,10.4762,5.16129,10.1587,5.16129C8.73016,5.16129,8.25397,5.96774,8.09524,6.6129L7.77778,8.54839L9.36508,8.54839C9.68254,8.54839,10,8.87097,10,9.19355C10,9.51613,9.68254,9.83871,9.36508,9.83871L7.61905,9.83871L6.50794,14.8387Q6.34921,16.2903,5.39683,16.2903Q4.44444,16.2903,4.92064,14.8387L6.03175,10L4.60317,10C4.28571,10,3.96825,9.67742,3.96825,9.35484C3.96825,8.70968,4.28571,8.54839,4.60317,8.54839L6.34921,8.54839L6.8254,6.45161C7.14286,3.70968,9.52381,3.54839,10.3175,3.70968ZM18.4127,6.6129C18.5714,6.12903,18.8889,5.96774,19.3651,5.96774C19.8413,6.12903,20,6.45161,20,6.93548L18.4127,13.3871C18.254,13.871,17.9365,14.0323,17.4603,14.0323C16.9841,13.871,16.8254,13.5484,16.8254,13.0645L18.4127,6.6129Z"/></svg>
+                <span>Indicators</span>
+            </button>
+            <button type="button" class="tv-tool-btn" id="btnLogScale" title="Toggle Logarithmic / Linear Price Scale (L)">Log</button>
+            <button type="button" class="tv-tool-btn active" id="btnAutoScale" title="Toggle Auto Price Scale (A)">Auto</button>
+            <button type="button" class="tv-tool-btn" id="btnResetChart" title="Reset Chart View (Alt + R)">Reset</button>
+            <span class="tv-tool-sep" aria-hidden="true"></span>
+            <div class="draw-ws-wrap" id="analysisMenuWrap">
+                <button type="button" class="tv-tool-btn" id="analysisMenuBtn" title="Analysis">
+                    <svg viewBox="0 0 20 20"><path d="M2.5,18.75A1.25,1.25,0,0,1,1.25,17.5V2.5A1.25,1.25,0,0,1,2.5,1.25h0A1.25,1.25,0,0,1,3.75,2.5v15A1.25,1.25,0,0,1,2.5,18.75Zm5-5A1.25,1.25,0,0,1,6.25,12.5v-6A1.25,1.25,0,0,1,7.5,5.25h0A1.25,1.25,0,0,1,8.75,6.5v6A1.25,1.25,0,0,1,7.5,13.75Zm5,3.75a1.25,1.25,0,0,1-1.25-1.25V6.25A1.25,1.25,0,0,1,12.5,5h0a1.25,1.25,0,0,1,1.25,1.25v10A1.25,1.25,0,0,1,12.5,17.5Zm5-3.75a1.25,1.25,0,0,1-1.25-1.25v-3A1.25,1.25,0,0,1,17.5,8.25h0A1.25,1.25,0,0,1,18.75,9.5v3A1.25,1.25,0,0,1,17.5,13.75Z"/></svg>
+                    <span>Analysis</span>
+                    <svg viewBox="0 0 18 18" width="12" height="12" aria-hidden="true">
+                        <polyline points="4,6.5 9,12 14,6.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+                <div class="draw-ws-menu" id="analysisMenu" role="menu">
+                    <button type="button" class="draw-ws-item" data-href="/analysis" role="menuitem">
+                        <span class="draw-ws-item-icon">
+                            <svg viewBox="0 0 18 18" width="16" height="16"
+                                 fill="none" stroke="currentColor"
+                                 stroke-width="1.4" stroke-linecap="round"
+                                 stroke-linejoin="round" aria-hidden="true">
+                                <line x1="2.5" y1="15.5" x2="2.5" y2="2"/>
+                                <line x1="2.5" y1="15.5" x2="16" y2="15.5"/>
+                                <polyline points="4,13 8,8 11,10.5 15,4"/>
+                                <polyline points="11.5,4 15,4 15,7.5"/>
+                            </svg>
+                        </span>
+                        <span class="draw-ws-item-label">Quant Analysis</span>
+                    </button>
+
+                    <button type="button" class="draw-ws-item" data-href="/financials" role="menuitem">
+                        <span class="draw-ws-item-icon">
+                            <svg viewBox="0 0 18 18" width="16" height="16"
+                                 fill="none" stroke="currentColor"
+                                 stroke-width="1.4" stroke-linecap="round"
+                                 stroke-linejoin="round" aria-hidden="true">
+                                <polygon points="9,2.5 15.5,6 2.5,6"/>
+                                <line x1="4.5"  y1="7.5" x2="4.5"  y2="13"/>
+                                <line x1="9"    y1="7.5" x2="9"    y2="13"/>
+                                <line x1="13.5" y1="7.5" x2="13.5" y2="13"/>
+                                <line x1="2.5"  y1="14.5" x2="15.5" y2="14.5"/>
+                            </svg>
+                        </span>
+                        <span class="draw-ws-item-label">Fundamental Analysis</span>
+                    </button>
+
+                    <button type="button" class="draw-ws-item" data-href="/ai" role="menuitem">
+                        <span class="draw-ws-item-icon">
+                            <svg viewBox="0 0 18 18" width="16" height="16"
+                                 fill="none" stroke="none" aria-hidden="true">
+                                <path d="M8 2 L9.2 6.8 L14 8 L9.2 9.2 L8 14 L6.8 9.2 L2 8 L6.8 6.8 Z"
+                                      fill="currentColor"/>
+                                <path d="M14 2.5 L14.5 4 L16 4.5 L14.5 5 L14 6.5 L13.5 5 L12 4.5 L13.5 4 Z"
+                                      fill="currentColor"/>
+                            </svg>
+                        </span>
+                        <span class="draw-ws-item-label">AI Analysis</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart Workspace Container (hosts main candlestick pane + synced oscillator sub-panes) -->
+    <div id="chart"></div>
+
+</div>
+
+<!-- ============================================================
+     Symbol search modal
+     ============================================================ -->
+<div class="modal-overlay" id="symbolSearchOverlay">
+    <div class="inner" style="width: 460px;">
+        <div class="title-container">
+            <span>Symbol Search</span>
+            <svg class="close-icon" id="closeSymbolSearch" viewBox="0 0 1024 1024">
+                <path d="M934.184927 199.723787 622.457206 511.452531l311.727721 311.703161c14.334473 14.229073 23.069415 33.951253 23.069415 55.743582 0 43.430138-35.178197 78.660524-78.735226 78.660524-21.664416 0-41.361013-8.865925-55.642275-23.069415L511.149121 622.838388 199.420377 934.490384c-14.204513 14.20349-33.901111 23.069415-55.642275 23.069415-43.482327 0-78.737272-35.230386-78.737272-78.660524 0-21.792329 8.864902-41.513486 23.094998-55.743582l311.677579-311.703161L88.135828 199.723787c-14.230096-14.255679-23.094998-33.92567-23.094998-55.642275 0-43.430138 35.254945-78.762855 78.737272-78.762855 21.741163 0 41.437761 8.813736 55.642275 23.069415l311.727721 311.727721L822.876842 88.389096c14.281261-14.255679 33.977859-23.069415 55.642275-23.069415 43.557028 0 78.735226 35.332716 78.735226 78.762855C957.254342 165.798117 948.5194 185.468109 934.184927 199.723787"/>
+            </svg>
+        </div>
+        <div class="content-container">
+            <div class="symbol-search-input">
+                <input class="value" id="symbolSearchInput" placeholder="Search symbol or name..." autocomplete="off">
+                <span class="suffix">
+                    <svg viewBox="0 0 1024 1024">
+                        <path d="M945.066667 898.133333l-189.866667-189.866666c55.466667-64 87.466667-149.333333 87.466667-241.066667 0-204.8-168.533333-373.333333-373.333334-373.333333S96 264.533333 96 469.333333 264.533333 842.666667 469.333333 842.666667c91.733333 0 174.933333-34.133333 241.066667-87.466667l189.866667 189.866667c6.4 6.4 14.933333 8.533333 23.466666 8.533333s17.066667-2.133333 23.466667-8.533333c8.533333-12.8 8.533333-34.133333-2.133333-46.933334zM469.333333 778.666667C298.666667 778.666667 160 640 160 469.333333S298.666667 160 469.333333 160 778.666667 298.666667 778.666667 469.333333 640 778.666667 469.333333 778.666667z"/>
+                    </svg>
+                </span>
+            </div>
+            <ul class="symbol-list" id="symbolList"></ul>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================
+     Indicators modal
+     ============================================================ -->
+<div class="modal-overlay" id="indicatorsOverlay">
+    <div class="inner" style="width: 420px;">
+        <div class="title-container">
+            <span>Indicators &amp; Strategies</span>
+            <svg class="close-icon" id="closeIndicators" viewBox="0 0 1024 1024">
+                <path d="M934.184927 199.723787 622.457206 511.452531l311.727721 311.703161c14.334473 14.229073 23.069415 33.951253 23.069415 55.743582 0 43.430138-35.178197 78.660524-78.735226 78.660524-21.664416 0-41.361013-8.865925-55.642275-23.069415L511.149121 622.838388 199.420377 934.490384c-14.204513 14.20349-33.901111 23.069415-55.642275 23.069415-43.482327 0-78.737272-35.230386-78.737272-78.660524 0-21.792329 8.864902-41.513486 23.094998-55.743582l311.677579-311.703161L88.135828 199.723787c-14.230096-14.255679-23.094998-33.92567-23.094998-55.642275 0-43.430138 35.254945-78.762855 78.737272-78.762855 21.741163 0 41.437761 8.813736 55.642275 23.069415l311.727721 311.727721L822.876842 88.389096c14.281261-14.255679 33.977859-23.069415 55.642275-23.069415 43.557028 0 78.735226 35.332716 78.735226 78.762855C957.254342 165.798117 948.5194 185.468109 934.184927 199.723787"/>
+            </svg>
+        </div>
+        <div class="content-container">
+            <div class="symbol-search-input">
+                <input class="value" id="indicatorSearchInput" placeholder="Filter indicators..." autocomplete="off">
+                <span class="suffix">
+                    <svg viewBox="0 0 1024 1024">
+                        <path d="M945.066667 898.133333l-189.866667-189.866666c55.466667-64 87.466667-149.333333 87.466667-241.066667 0-204.8-168.533333-373.333333-373.333334-373.333333S96 264.533333 96 469.333333 264.533333 842.666667 469.333333 842.666667c91.733333 0 174.933333-34.133333 241.066667-87.466667l189.866667 189.866667c6.4 6.4 14.933333 8.533333 23.466666 8.533333s17.066667-2.133333 23.466667-8.533333c8.533333-12.8 8.533333-34.133333-2.133333-46.933334zM469.333333 778.666667C298.666667 778.666667 160 640 160 469.333333S298.666667 160 469.333333 160 778.666667 298.666667 778.666667 469.333333 640 778.666667 469.333333 778.666667z"/>
+                    </svg>
+                </span>
+            </div>
+            <ul class="indicator-list" id="indicatorsList"></ul>
+        </div>
+    </div>
+</div>
+
+<!-- Indicator Settings Modal -->
+<div class="modal fade" id="indicatorSettingsModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="indicatorModalTitle">Settings</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="indicatorModalBody"></div>
+            <div class="modal-footer p-2">
+                <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-sm btn-primary" id="saveIndicatorSettingsBtn">Apply</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script id="app-data" type="application/json">
+{{ {
+    "initAsset":     selected_asset,
+    "initTimeframe": selected_timeframe,
+    "assets":        assets
+} | tojson }}
+</script>
+<script>
+    (function () {
+        const el = document.getElementById('app-data');
+        const data = JSON.parse(el.textContent);
+        window.APP_CONFIG = {
+            initAsset:     data.initAsset,
+            initTimeframe: data.initTimeframe
+        };
+        window.APP_ASSETS = data.assets;
+    })();
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/static/diagnostics.js?v=lw16"></script>
+<script src="/static/chart.js?v=lw16"></script>
+<script src="/static/smc.js?v=lw16"></script>
+<script src="/static/indicators.js?v=lw16"></script>
+<script src="/static/drawtools.js?v=lw16"></script>
+<script src="/static/osaverage.js?v=lw16"></script>
+<script src="/static/vpsr.js?v=lw16"></script>
+
+</body>
+</html>

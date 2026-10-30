@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quant Analysis Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Chart.js for the Efficient Frontier & KDE Distribution -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.1.0/dist/chartjs-plugin-annotation.min.js"></script>
+    <!-- MathJax for rendering LaTeX formulas -->
+    <script>
+        MathJax = {
+            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <style>
+        body { background-color: #f4f6f9; }
+        .card { border: none; border-radius: 10px; }
+        .metric-card { transition: transform 0.15s ease-in-out; }
+        .metric-card:hover { transform: translateY(-2px); }
+        .metric-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: #6c757d; font-weight: 600; }
+        .metric-value { font-size: 1.6rem; font-weight: 700; }
+        .table-matrix th, .table-matrix td { text-align: center; vertical-align: middle; }
+        .optimal-row { background-color: rgba(40, 167, 69, 0.1) !important; border-left: 4px solid #28a745; }
+    </style>
+</head>
+<body class="py-4">
+    <div class="container">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+            <div>
+                <h3 class="fw-bold mb-0">Asset Pricing & Quantitative Risk Matrix</h3>
+                <small class="text-muted">Statistical comparison & risk-adjusted performance metrics</small>
+            </div>
+            <a href="/" class="btn btn-outline-secondary btn-sm">← Back to Charts</a>
+        </div>
+
+        <!-- Asset Selection Control -->
+        <div class="card shadow-sm p-3 mb-4">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Primary Asset (X)</label>
+                    <select id="asset1" class="form-select">
+                        {% for asset in assets %}
+                            <option value="{{ asset.value }}">{{ asset.label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Comparative Asset (Y)</label>
+                    <select id="asset2" class="form-select">
+                        {% for asset in assets %}
+                            <option value="{{ asset.value }}" {% if loop.index == 2 %}selected{% endif %}>{{ asset.label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <button id="calcBtn" class="btn btn-primary w-100 fw-semibold">
+                        Compute Statistics
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Container populated by JS -->
+        <div id="resultsContainer" style="display: none;">
+            
+            <!-- Time Period & Context Bar -->
+            <div class="alert alert-secondary py-2 mb-4 d-flex justify-content-between align-items-center">
+                <div><strong>Data Period:</strong> <span id="dateRange">--</span></div>
+                <div><strong>Calculation Interval:</strong> <span id="tfDisplay">--</span></div>
+            </div>
+
+            <!-- Individual KPI Cards -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-3">
+                    <div class="card shadow-sm p-3 metric-card bg-white border-start border-4 border-primary">
+                        <div class="metric-label" id="a1VolLabel">Asset 1 Volatility</div>
+                        <div class="metric-value text-primary" id="a1Vol">--</div>
+                        <small class="text-muted">Annualized ($\sigma$)</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card shadow-sm p-3 metric-card bg-white border-start border-4 border-primary">
+                        <div class="metric-label" id="a1SharpeLabel">Asset 1 Sharpe Ratio</div>
+                        <div class="metric-value text-primary" id="a1Sharpe">--</div>
+                        <small class="text-muted" id="a1SharpeSubtext">Annualized (Dynamic $R_f$)</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card shadow-sm p-3 metric-card bg-white border-start border-4 border-success">
+                        <div class="metric-label" id="a2VolLabel">Asset 2 Volatility</div>
+                        <div class="metric-value text-success" id="a2Vol">--</div>
+                        <small class="text-muted">Annualized ($\sigma$)</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card shadow-sm p-3 metric-card bg-white border-start border-4 border-success">
+                        <div class="metric-label" id="a2SharpeLabel">Asset 2 Sharpe Ratio</div>
+                        <div class="metric-value text-success" id="a2Sharpe">--</div>
+                        <small class="text-muted" id="a2SharpeSubtext">Annualized (Dynamic $R_f$)</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistical Matrices -->
+            <div class="row g-4 mb-4">
+                <div class="col-md-6">
+                    <div class="card shadow-sm p-4 h-100 bg-white">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="fw-bold mb-0">Correlation Matrix ($\rho$)</h5>
+                            <span id="corrBadge" class="badge"></span>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-matrix mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Asset</th>
+                                        <th id="thCorr1"></th>
+                                        <th id="thCorr2"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <th class="table-light" id="rowCorr1"></th>
+                                        <td id="c11" class="text-muted">1.0000</td>
+                                        <td id="c12" class="fw-bold">--</td>
+                                    </tr>
+                                    <tr>
+                                        <th class="table-light" id="rowCorr2"></th>
+                                        <td id="c21" class="fw-bold">--</td>
+                                        <td id="c22" class="text-muted">1.0000</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card shadow-sm p-4 h-100 bg-white">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="fw-bold mb-0">Covariance Matrix ($\Sigma$)</h5>
+                            <span class="badge bg-light text-dark border">Pairwise Dispersion</span>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-matrix mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Asset</th>
+                                        <th id="thCov1"></th>
+                                        <th id="thCov2"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <th class="table-light" id="rowCov1"></th>
+                                        <td id="cov11">--</td>
+                                        <td id="cov12">--</td>
+                                    </tr>
+                                    <tr>
+                                        <th class="table-light" id="rowCov2"></th>
+                                        <td id="cov21">--</td>
+                                        <td id="cov22">--</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Portfolio Sensitivity & Efficient Frontier -->
+            <div class="row g-4 mb-4">
+                <div class="col-md-7">
+                    <div class="card shadow-sm p-4 h-100 bg-white">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="fw-bold mb-0">Allocation Sensitivity</h5>
+                            <span class="badge bg-light text-dark border">Weight Distribution</span>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover table-bordered table-matrix mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th id="thSens1">Asset 1</th>
+                                        <th id="thSens2">Asset 2</th>
+                                        <th>Return (Ann.)</th>
+                                        <th>Volatility (Ann.)</th>
+                                        <th>Sharpe</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="sensitivityBody">
+                                    <!-- Populated by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-5">
+                    <div class="card shadow-sm p-4 bg-white h-100">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="fw-bold mb-0">Efficient Frontier</h5>
+                            <span class="badge bg-light text-dark border">Risk vs. Return</span>
+                        </div>
+                        <div class="position-relative d-flex justify-content-center align-items-center" style="min-height: 300px; height: 100%; width: 100%;">
+                            <canvas id="frontierChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Automated Insights, Treasury Bills & Mathematical Framework -->
+            <div class="row g-4 mb-4">
+                
+                <!-- LEFT COLUMN: Insights & Treasury Bills -->
+                <div class="col-md-7">
+                    <div class="card shadow-sm p-4 bg-white mb-4">
+                        <h5 class="fw-bold mb-3">Automated Insight</h5>
+                        <p id="autoSummary" class="text-muted" style="line-height: 1.7; font-size: 0.95rem;">
+                            <!-- Populated by JS -->
+                        </p>
+                    </div>
+
+                    <div class="card shadow-sm p-4 bg-white border-start border-4 border-info">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="fw-bold mb-0">Treasury Bills (Yield Curve)</h5>
+                            <span class="badge bg-info text-dark" id="selectedRfBadge">Selected Rf: --</span>
+                        </div>
+                        <div class="table-responsive" style="max-height: 250px; overflow-y: auto;">
+                            <table class="table table-hover table-sm mb-0 table-matrix">
+                                <thead class="table-light" style="position: sticky; top: 0; z-index: 1;">
+                                    <tr>
+                                        <th>Symbol</th>
+                                        <th>Maturity Date</th>
+                                        <th>Days Left</th>
+                                        <th>YTM (Ann.)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="bondsBody">
+                                    <!-- Populated by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RIGHT COLUMN: Mathematical Framework -->
+                <div class="col-md-5">
+                    <div class="card shadow-sm p-4 h-100 bg-white">
+                        <h5 class="fw-bold mb-3">Mathematical Framework</h5>
+                        <div class="small text-muted mt-2">
+                            <strong>Expected Portfolio Return:</strong>
+                            <div class="my-2">
+                                $$E(R_p) = w_1 E(R_1) + w_2 E(R_2)$$
+                            </div>
+                            <hr class="my-3">
+                            <strong>Portfolio Variance:</strong>
+                            <div class="my-2">
+                                $$\sigma_p^2 = w_1^2 \sigma_1^2 + w_2^2 \sigma_2^2 + 2w_1w_2Cov(R_1,R_2)$$
+                            </div>
+                            <hr class="my-3">
+                            <strong>Sharpe Ratio (using $R_f$):</strong>
+                            <div class="my-2">
+                                $$S_p = \frac{E(R_p) - R_f}{\sigma_p}$$
+                            </div>
+                            <hr class="my-3">
+                            <strong>Treasury Bill Yield to Maturity ($YTM$):</strong>
+                            <div class="my-2 mt-3">
+                                $$YTM = \left(\frac{\text{Face Value}}{\text{Price}}\right)^{\frac{365}{\text{Days}}} - 1$$
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Return Distribution & Stationarity Analysis -->
+            <div class="row g-4 mb-4">
+                <div class="col-md-7">
+                    <div class="card shadow-sm p-4 h-100 bg-white">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="fw-bold mb-0">Return Distribution (KDE)</h5>
+                            <span class="badge bg-light text-dark border">Probability Density</span>
+                        </div>
+                        <div class="position-relative d-flex justify-content-center align-items-center" style="min-height: 300px; height: 100%; width: 100%;">
+                            <canvas id="distChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-5">
+                    <div class="card shadow-sm p-4 h-100 bg-white">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="fw-bold mb-0">Distribution Shape & Stationarity</h5>
+                            <span class="badge bg-light text-dark border">ADF Test</span>
+                        </div>
+                        <div class="table-responsive mt-2">
+                            <table class="table table-bordered table-sm mb-0 text-center">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Metric</th>
+                                        <th id="thDist1">Asset 1</th>
+                                        <th id="thDist2">Asset 2</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <th class="table-light text-start">Skewness <small class="text-muted">(Symmetry)</small></th>
+                                        <td id="skew1">--</td>
+                                        <td id="skew2">--</td>
+                                    </tr>
+                                    <tr>
+                                        <th class="table-light text-start">Kurtosis <small class="text-muted">(Fat Tails)</small></th>
+                                        <td id="kurt1">--</td>
+                                        <td id="kurt2">--</td>
+                                    </tr>
+                                    <tr>
+                                        <th class="table-light text-start">ADF Stat <small class="text-muted">(Test Value)</small></th>
+                                        <td id="adf1">--</td>
+                                        <td id="adf2">--</td>
+                                    </tr>
+                                    <tr>
+                                        <th class="table-light text-start">p-value <small class="text-muted">(Sig. Level)</small></th>
+                                        <td id="pval1">--</td>
+                                        <td id="pval2">--</td>
+                                    </tr>
+                                    <tr>
+                                        <th class="table-light text-start">Stationary? <small class="text-muted">(p &lt; 0.05)</small></th>
+                                        <td id="stat1">--</td>
+                                        <td id="stat2">--</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="small text-muted mt-3" style="line-height: 1.6;">
+                            * <strong>Stationarity</strong> is crucial for quantitative modeling; non-stationary returns render covariance unstable over time. <br>
+                            * <strong>Excess Kurtosis</strong> (>3) indicates "fat tails," implying a higher probability of extreme price movements than a normal distribution predicts.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Historical Performance & Rolling Statistics -->
+            <div class="row g-4 mt-1">
+                <!-- Heatmap & Yearly Bar -->
+                <div class="col-md-12">
+                    <div class="card shadow-sm p-4 bg-white">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="fw-bold mb-0">Historical Performance</h5>
+                            
+                            <!-- Toggle Selector for Assets -->
+                            <ul class="nav nav-pills nav-sm shadow-sm rounded" id="perfAssetTabs" role="tablist" style="background: #f8f9fa; border: 1px solid #dee2e6;">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active py-1 px-3 fw-bold" id="tab-asset1" data-bs-toggle="pill" type="button" role="tab">Asset 1</button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link py-1 px-3 fw-bold" id="tab-asset2" data-bs-toggle="pill" type="button" role="tab">Asset 2</button>
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <!-- align-items-stretch forces columns to equal height -->
+                        <div class="row align-items-stretch">
+                            <!-- Monthly Heatmap Table -->
+                            <div class="col-md-7 d-flex flex-column">
+                                <h6 class="text-center fw-bold text-muted mb-2">Monthly Returns</h6>
+                                <div class="table-responsive flex-grow-1" id="heatmapContainer">
+                                    <table class="table table-sm table-bordered text-center align-middle h-100 mb-0" id="heatmapTable" style="font-size: 0.8rem;">
+                                        <!-- Populated by JS -->
+                                    </table>
+                                </div>
+                            </div>
+                            
+                            <!-- Yearly Returns Chart -->
+                            <div class="col-md-5 d-flex flex-column">
+                                <h6 class="text-center fw-bold text-muted mb-2">Yearly Returns</h6>
+                                <div class="flex-grow-1 position-relative" style="width: 100%; min-height: 250px;">
+                                    <canvas id="yearlyChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Rolling Statistics Line Chart -->
+                <div class="col-md-12 mb-5">
+                    <div class="card shadow-sm p-4 bg-white">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="fw-bold mb-0">Rolling Statistics [1 Month]</h5>
+                            <span class="badge bg-light text-dark border">Return vs. Volatility</span>
+                        </div>
+                        <div style="height: 350px; width: 100%;">
+                            <canvas id="rollingChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Centralized JS Logic -->
+    <script src="/static/quant.js"></script>
+</body>
+</html>
